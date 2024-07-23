@@ -13,7 +13,7 @@ class Footer {
                 <h5>SOCIAL ICONS</h5><p><a href="#" class="fa fa-facebook"></a><a href="#" class="fa fa-twitter"></a><a href="#" class="fa fa-google"></a><a href="#" class="fa fa-youtube"></a><a href="#" class="fa fa-instagram"></a></p>
             </div>
             <div class="col-3" style="float: right; height: 250px; padding: 10px;overflow: hidden;text-overflow: ellipsis;">
-                <h5>HELP</h5> <a style="text-decoration:none" href="pages/login.php"><button style="background-color:red;padding:5px">Donate Blood</button></a>
+                <h5>HELP</h5> <a style="text-decoration:none" href="login.php"><button style="background-color:red;padding:5px">Donate Blood</button></a>
             </div>
             <div class="col-3" style="float: right; height: 250px; padding: 10px; font-size: 15px; color: rgb(171, 175, 181);overflow: hidden;text-overflow: ellipsis;">
                 <h5>KEEP IN TOUCH</h5><p>butwal, Nepal<br><br>(+977) 9869837997 &ensp; prabeenneupane123@gmail.com</p>

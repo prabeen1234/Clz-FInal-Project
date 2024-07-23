@@ -46,10 +46,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             align-items: center;
             height: 100vh;
             margin: 0;
-            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            background: whitesmoke(135deg, #f6d365 0%, #fda085 100%);
         }
         .login-container {
-            background: #fff;
+            background: whitesmoke;
             padding: 40px;
             border-radius: 12px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -99,7 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <div class="login-container">
-        <h2>Login</h2>
+        <h2>Login Your Credentials</h2>
         <?php if (isset($error)): ?>
             <div class="error"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
@@ -116,6 +116,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <input type="submit" value="Login">
             </div>
         </form>
+        <div>Not Registered?
+            <a href="pages/register.php"><b>Register Now</b></a>
+        </div>
     </div>
 </body>
 </html>
