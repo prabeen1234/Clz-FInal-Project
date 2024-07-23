@@ -187,6 +187,7 @@ if (!$users_result) {
                         <th>Username</th>
                         <th>Fullname</th>
                         <th>Email</th>
+                        <th>Blood Group</th>
                         <th>Role</th>
                         <th>Actions</th>
                     </tr>
@@ -198,6 +199,7 @@ if (!$users_result) {
                             <td><?php echo htmlspecialchars($user['username']); ?></td>
                             <td><?php echo htmlspecialchars($user['fullname']); ?></td>
                             <td><?php echo htmlspecialchars($user['email']); ?></td>
+                            <td><?php echo htmlspecialchars($user['bloodgroup']); ?></td>
                             <td><?php echo htmlspecialchars($user['role']); ?></td>
                             <td class="actions">
                                 <form action="manage_user.php" method="post" style="display:inline;">

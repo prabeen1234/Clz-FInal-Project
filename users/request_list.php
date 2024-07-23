@@ -11,6 +11,16 @@ $con = $db->getConnection();
 
 $user_id = $_SESSION['user_id'];
 
+// Handle request deletion
+if (isset($_POST['delete_request_id'])) {
+    $request_id = $_POST['delete_request_id'];
+    $delete_query = $con->prepare("DELETE FROM requests WHERE id = ? AND user_id = ?");
+    $delete_query->bind_param("ii", $request_id, $user_id);
+    $delete_query->execute();
+    header("Location: request_list.php");
+    exit();
+}
+
 // Fetch user requests
 $requests_query = $con->prepare("SELECT * FROM requests WHERE user_id = ?");
 $requests_query->bind_param("i", $user_id);
@@ -24,21 +34,16 @@ $requests_result = $requests_query->get_result();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Requests</title>
     <style>
-        /* General Styles */
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f0f2f5;
             margin: 0;
             padding: 0;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
+            background-color: #f0f2f5;
         }
 
         .dashboard {
             display: flex;
-            width: 100%;
-            height: 100%;
+            height: 100vh;
             overflow: hidden;
         }
 
@@ -50,17 +55,12 @@ $requests_result = $requests_query->get_result();
             height: 100%;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
             flex-shrink: 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            overflow-y: auto;
-            transition: width 0.3s ease;
         }
 
         .side-menu h2 {
-            font-size: 22px;
+            font-size: 24px;
             margin-bottom: 20px;
-            font-weight: 600;
+            color: #ffc107;
         }
 
         .side-menu a {
@@ -70,50 +70,33 @@ $requests_result = $requests_query->get_result();
             padding: 10px;
             margin: 10px 0;
             border-radius: 5px;
-            transition: background-color 0.3s ease, padding-left 0.3s ease;
-            font-size: 16px;
+            transition: background-color 0.3s ease;
         }
 
         .side-menu a.active, .side-menu a:hover {
             background-color: #007bff;
-            padding-left: 20px;
         }
 
         .side-menu a.logout-btn {
             background-color: #dc3545;
         }
 
-        .side-menu a.logout-btn:hover {
-            background-color: #c82333;
-        }
-
-        /* Dashboard Content Styles */
         .dashboard-content {
             flex: 1;
-            margin-left: 250px; /* Adjust for sidebar width */
             padding: 20px;
             background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
             overflow: auto;
-            transition: margin-left 0.3s ease;
         }
 
         .dashboard-content h2 {
             font-size: 28px;
             margin-bottom: 20px;
             color: #333;
-            font-weight: 600;
         }
 
-        /* Table Styles */
         .request-table {
             width: 100%;
             border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
             margin-top: 20px;
         }
 
@@ -123,7 +106,7 @@ $requests_result = $requests_query->get_result();
         }
 
         .request-table th, .request-table td {
-            padding: 15px;
+            padding: 12px;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
@@ -141,57 +124,26 @@ $requests_result = $requests_query->get_result();
             background-color: #f9f9f9;
         }
 
-        /* Message Styles */
-        #message-container {
-            margin-bottom: 20px;
-        }
-
-        .message {
-            padding: 15px;
+        .request-table .delete-btn {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
             border-radius: 5px;
-            margin-bottom: 15px;
-            font-size: 16px;
-            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
-        .message.success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .message.error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        /* Responsive Styles */
-        @media (max-width: 1024px) {
-            .dashboard-content {
-                margin-left: 0;
-                padding: 15px;
-            }
-
-            .side-menu {
-                width: 100%;
-                height: auto;
-                position: relative;
-                box-shadow: none;
-                display: block;
-            }
-
-            .side-menu a {
-                display: inline-block;
-                margin: 5px 0;
-            }
+        .request-table .delete-btn:hover {
+            background-color: #c82333;
         }
 
         @media (max-width: 768px) {
             .side-menu {
                 width: 200px;
             }
-
             .dashboard-content {
-                margin-left: 200px; /* Adjust for updated sidebar width */
+                margin-left: 200px;
                 padding: 15px;
             }
         }
@@ -200,24 +152,28 @@ $requests_result = $requests_query->get_result();
             .dashboard {
                 flex-direction: column;
             }
-
             .side-menu {
                 width: 100%;
                 height: auto;
                 box-shadow: none;
             }
-
             .dashboard-content {
                 margin-left: 0;
                 padding: 10px;
             }
-
             .request-table th, .request-table td {
                 font-size: 14px;
                 padding: 10px;
             }
         }
     </style>
+    <script>
+        function confirmDelete(event) {
+            if (!confirm('Are you sure you want to delete this request?')) {
+                event.preventDefault(); // Prevent the form from submitting
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="dashboard">
@@ -240,6 +196,7 @@ $requests_result = $requests_query->get_result();
                         <th>Donor ID</th>
                         <th>Status</th>
                         <th>Created At</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -249,6 +206,12 @@ $requests_result = $requests_query->get_result();
                             <td><?php echo htmlspecialchars($row['donor_id']); ?></td>
                             <td><?php echo htmlspecialchars($row['status']); ?></td>
                             <td><?php echo htmlspecialchars($row['created_at']); ?></td>
+                            <td>
+                                <form method="post" action="" onsubmit="confirmDelete(event)">
+                                    <input type="hidden" name="delete_request_id" value="<?php echo htmlspecialchars($row['id']); ?>">
+                                    <button type="submit" class="delete-btn">Delete</button>
+                                </form>
+                            </td>
                         </tr>
                     <?php endwhile; ?>
                 </tbody>

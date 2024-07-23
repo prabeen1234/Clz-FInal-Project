@@ -214,7 +214,7 @@ document.getElementById('longitude').value = this.getPosition().lng();
         <div class="side-menu">
             <h2>Dashboard</h2>
             <a href="user_dashboard.php">Search Blood</a>
-            <a href="view_requests.php">View Requests</a>
+            <a href="request_list.php">View Requests</a>
             <a href="../logout.php" class="logout-btn">Logout</a>
         </div>
 

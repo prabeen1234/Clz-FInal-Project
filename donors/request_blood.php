@@ -21,8 +21,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $update_query = $con->prepare("UPDATE requests SET status = 'Accepted', donor_id = ? WHERE id = ?");
             $update_query->bind_param("ii", $user_id, $request_id);
         } else if ($action === 'Reject') {
-            $update_query = $con->prepare("UPDATE requests SET status = 'Rejected' WHERE id = ?");
-            $update_query->bind_param("i", $request_id);
+            $update_query = $con->prepare("UPDATE requests SET status = 'Rejected', donor_id = ? WHERE id = ?");
+            $update_query->bind_param("ii", $user_id, $request_id);
         } else {
             $response = array("status" => "error", "message" => "Invalid action: '$action'.");
             echo json_encode($response);
@@ -31,13 +31,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($update_query->execute()) {
             echo '<script>
-            alert("Updated successful");
-            window.location.href = "../donors/request_blood.php";
+            alert("Request updated successfully");
+            window.location.href = "request_blood.php";
             </script>';
         } else {
             $response = array("status" => "error", "message" => "Failed to update request.");
+            echo json_encode($response);
         }
-        echo json_encode($response);
         exit();
     }
 }
@@ -86,17 +86,11 @@ $requests_result = $con->query($requests_query);
             height: 100%;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
             flex-shrink: 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            overflow-y: auto;
-            transition: width 0.3s ease;
         }
 
         .side-menu h2 {
             font-size: 22px;
             margin-bottom: 20px;
-            font-weight: 600;
         }
 
         .side-menu a {
@@ -106,39 +100,31 @@ $requests_result = $con->query($requests_query);
             padding: 10px;
             margin: 10px 0;
             border-radius: 5px;
-            transition: background-color 0.3s ease, padding-left 0.3s ease;
-            font-size: 16px;
+            transition: background-color 0.3s ease;
         }
 
         .side-menu a.active, .side-menu a:hover {
             background-color: #007bff;
-            padding-left: 20px;
         }
 
         .side-menu a.logout-btn {
             background-color: #dc3545;
         }
 
-        .side-menu a.logout-btn:hover {
-            background-color: #c82333;
-        }
-
         .dashboard-content {
             flex: 1;
-            margin-left: 250px; /* Adjust for sidebar width */
             padding: 20px;
             background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
             overflow: auto;
-            transition: margin-left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .dashboard-content h2 {
             font-size: 28px;
             margin-bottom: 20px;
             color: #333;
-            font-weight: 600;
         }
 
         .form-container {
@@ -166,131 +152,112 @@ $requests_result = $con->query($requests_query);
             background-color: #dc3545;
         }
 
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .form-group input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 15px;
+        }
+
+        .form-group input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
         .request-table {
             width: 100%;
             border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
             margin-top: 20px;
-        }
-
-        .request-table thead {
-            background-color: #343a40;
-            color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .request-table th, .request-table td {
-            padding: 15px;
+            border: 1px solid #ddd;
+            padding: 12px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
         }
 
         .request-table th {
-            font-size: 16px;
-            font-weight: 600;
+            background-color: #f8f9fa;
+            color: #333;
         }
 
-        .request-table td {
-            font-size: 14px;
+        .request-table tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
         }
 
-        .request-table tr:nth-child(even) {
-            background-color: #f9f9f9;
+        .request-table tbody tr:hover {
+            background-color: #e9ecef;
         }
 
         .request-table td.actions {
             display: flex;
-            align-items: center;
+            justify-content: space-around;
         }
 
-        .request-table td.actions form {
-            display: flex;
-            gap: 10px;
-        }
-
-        .request-table td.actions input[type="submit"] {
-            padding: 8px 15px;
+        .request-table td.actions form input[type="submit"] {
+            background-color: #007bff;
+            color: white;
             border: none;
             cursor: pointer;
-            font-size: 14px;
+            padding: 10px 15px;
             border-radius: 5px;
-            color: #fff;
             transition: background-color 0.3s ease;
         }
 
-        .request-table td.actions .accept {
-            background-color: #28a745;
+        .request-table td.actions form input[type="submit"]:hover {
+            background-color: #0056b3;
         }
 
-        .request-table td.actions .accept:hover {
-            background-color: #218838;
-        }
-
-        .request-table td.actions .reject {
+        .request-table td.actions form input[type="submit"]:nth-child(2) {
             background-color: #dc3545;
         }
 
-        .request-table td.actions .reject:hover {
+        .request-table td.actions form input[type="submit"]:nth-child(2):hover {
             background-color: #c82333;
-        }
-
-        @media (max-width: 1024px) {
-            .dashboard-content {
-                margin-left: 0;
-                padding: 15px;
-            }
-
-            .side-menu {
-                width: 100%;
-                height: auto;
-                position: relative;
-                box-shadow: none;
-                display: block;
-            }
-
-            .side-menu a {
-                display: inline-block;
-                margin: 5px 0;
-            }
         }
 
         @media (max-width: 768px) {
             .side-menu {
-                width: 200px;
-            }
-
-            .dashboard-content {
-                margin-left: 200px; /* Adjust for updated sidebar width */
-                padding: 15px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .dashboard {
-                flex-direction: column;
-            }
-
-            .side-menu {
                 width: 100%;
                 height: auto;
-                box-shadow: none;
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .side-menu a {
+                flex: 1 1 100%;
+                text-align: center;
             }
 
             .dashboard-content {
-                margin-left: 0;
                 padding: 10px;
             }
 
-            .request-table th, .request-table td {
-                font-size: 14px;
+            .form-container {
                 padding: 10px;
-            }
-
-            .request-table td.actions input[type="submit"] {
-                padding: 6px 12px;
-                font-size: 12px;
             }
         }
     </style>
@@ -298,11 +265,13 @@ $requests_result = $con->query($requests_query);
 <body>
     <div class="dashboard">
         <div class="side-menu">
-            <h2>Donor Dashboard</h2>
+            <h2>Donor Menu</h2>
+            <a href="donor_dashboard.php">Dashboard</a>
             <a href="update_profile.php">Update Profile</a>
             <a href="request_blood.php" class="active">View Requests</a>
             <a href="../logout.php" class="logout-btn">Logout</a>
         </div>
+
         <div class="dashboard-content">
             <div class="form-container">
                 <?php if (isset($response)): ?>
@@ -315,7 +284,7 @@ $requests_result = $con->query($requests_query);
                     <thead>
                         <tr>
                             <th>Request ID</th>
-                            <th>Requester Id</th>
+                            <th>Requester ID</th>
                             <th>Created At</th>
                             <th>Actions</th>
                         </tr>
@@ -329,8 +298,8 @@ $requests_result = $con->query($requests_query);
                                 <td class="actions">
                                     <form method="POST">
                                         <input type="hidden" name="request_id" value="<?php echo htmlspecialchars($row['id']); ?>">
-                                        <input type="submit" name="action" value="Accept" class="accept">
-                                        <input type="submit" name="action" value="Reject" class="reject">
+                                        <input type="submit" name="action" value="Accept">
+                                        <input type="submit" name="action" value="Reject">
                                     </form>
                                 </td>
                             </tr>
