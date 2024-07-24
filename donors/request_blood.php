@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $update_query = $con->prepare("UPDATE requests SET status = 'Accepted', donor_id = ? WHERE id = ?");
             $update_query->bind_param("ii", $user_id, $request_id);
         } else if ($action === 'Reject') {
-            $update_query = $con->prepare("UPDATE requests SET status = 'Rejected', donor_id = ? WHERE id = ?");
+            $update_query = $con->prepare("UPDATE requests SET status = 'Declined', donor_id = ? WHERE id = ?");
             $update_query->bind_param("ii", $user_id, $request_id);
         } else {
             $response = array("status" => "error", "message" => "Invalid action: '$action'.");
@@ -52,6 +52,14 @@ $user = $user_result->fetch_assoc();
 // Fetch blood requests
 $requests_query = "SELECT * FROM requests WHERE status = 'Pending'";
 $requests_result = $con->query($requests_query);
+
+// Fetch accepted requests
+$accepted_requests_query = "SELECT * FROM requests WHERE donor_id = ? AND status = 'Accepted'";
+$accepted_requests_stmt = $con->prepare($accepted_requests_query);
+$accepted_requests_stmt->bind_param("i", $user_id);
+$accepted_requests_stmt->execute();
+$accepted_requests_result = $accepted_requests_stmt->get_result();
+$accepted_requests = $accepted_requests_result->fetch_all(MYSQLI_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -81,7 +89,7 @@ $requests_result = $con->query($requests_query);
         .side-menu {
             width: 250px;
             background-color: #343a40;
-            color: #fff;
+      h     color: #fff;
             padding: 20px;
             height: 100%;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
@@ -230,82 +238,118 @@ $requests_result = $con->query($requests_query);
             background-color: #0056b3;
         }
 
-        .request-table td.actions form input[type="submit"]:nth-child(2) {
+        .request-table td.actions form input[type="submit"].reject-btn {
             background-color: #dc3545;
         }
 
-        .request-table td.actions form input[type="submit"]:nth-child(2):hover {
+        .request-table td.actions form input[type="submit"].reject-btn:hover {
             background-color: #c82333;
         }
 
-        @media (max-width: 768px) {
-            .side-menu {
-                width: 100%;
-                height: auto;
-                display: flex;
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
+        .request-table td.actions form input[type="submit"].delete-btn {
+            background-color: #6c757d;
+        }
 
-            .side-menu a {
-                flex: 1 1 100%;
-                text-align: center;
-            }
+        .request-table td.actions form input[type="submit"].delete-btn:hover {
+            background-color: #5a6268;
+        }
 
-            .dashboard-content {
-                padding: 10px;
-            }
+        .accepted-requests {
+            margin-top: 20px;
+            width: 100%;
+        }
 
-            .form-container {
-                padding: 10px;
-            }
+        .accepted-requests h3 {
+            margin-bottom: 10px;
+            font-size: 24px;
+            color: #28a745;
+        }
+
+        .accepted-requests ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .accepted-requests ul li {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accepted-requests ul li span {
+            margin-right: 10px;
+        }
+
+        .accepted-requests ul li .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .accepted-requests ul li .delete-btn:hover {
+            background-color: #c82333;
         }
     </style>
 </head>
 <body>
     <div class="dashboard">
         <div class="side-menu">
-            <h2>Donor Menu</h2>
-            <a href="donor_dashboard.php">Dashboard</a>
+            <h2>Dashboard</h2>
+
             <a href="update_profile.php">Update Profile</a>
-            <a href="request_blood.php" class="active">View Requests</a>
+            <a href="request_blood.php" class="active">Blood Requests</a>
             <a href="../logout.php" class="logout-btn">Logout</a>
         </div>
-
         <div class="dashboard-content">
-            <div class="form-container">
-                <?php if (isset($response)): ?>
-                    <div class="message <?php echo $response['status']; ?>">
-                        <?php echo $response['message']; ?>
-                    </div>
-                <?php endif; ?>
-                <h2>Pending Blood Requests</h2>
-                <table class="request-table">
-                    <thead>
-                        <tr>
-                            <th>Request ID</th>
-                            <th>Requester ID</th>
-                            <th>Created At</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php while ($row = $requests_result->fetch_assoc()): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($row['id']); ?></td>
-                                <td><?php echo htmlspecialchars($row['user_id']); ?></td>
-                                <td><?php echo htmlspecialchars($row['created_at']); ?></td>
-                                <td class="actions">
-                                    <form method="POST">
-                                        <input type="hidden" name="request_id" value="<?php echo htmlspecialchars($row['id']); ?>">
-                                        <input type="submit" name="action" value="Accept">
-                                        <input type="submit" name="action" value="Reject">
-                                    </form>
-                                </td>
-                            </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
+            <h2>Blood Requests</h2>
+            <?php
+            if ($requests_result->num_rows > 0) {
+                echo '<table class="request-table">';
+                echo '<thead><tr><th>Requester Id</th><th>Created At</th><th>Status</th><th>Actions</th></tr></thead>';
+                echo '<tbody>';
+                while ($row = $requests_result->fetch_assoc()) {
+                    echo '<tr>';
+                    echo '<td>' . $row['user_id'] . '</td>';
+                    echo '<td>' . $row['created_at'] . '</td>';
+                    echo '<td>' . $row['status'] . '</td>';
+                    echo '<td class="actions">';
+                    echo '<form method="post" action="request_blood.php"><input type="hidden" name="request_id" value="' . $row['id'] . '"><input type="submit" name="action" value="Accept"></form>';
+                    echo '<form method="post" action="request_blood.php"><input type="hidden" name="request_id" value="' . $row['id'] . '"><input type="submit" name="action" value="Reject" class="reject-btn"></form>';
+
+                    echo '</td>';
+                    echo '</tr>';
+                }
+                echo '</tbody>';
+                echo '</table>';
+            } else {
+                echo '<p>No pending blood requests at the moment.</p>';
+            }
+            ?>
+            <div class="accepted-requests">
+                <h3>Accepted Requests</h3>
+                <ul>
+                    <?php
+                    foreach ($accepted_requests as $request) {
+                        echo '<th><b>Request Id</b></th>';
+                        echo '<li>';
+                        echo '<span>' . $request['id'] . ' </span>';
+                        echo '<span>' . $request['created_at'] . ' </span>';
+                        echo '<span><b>Please Visit Nearby Hospital or Blood Bank <br>As Soon as Possible!!!!!!</b> </span>';
+                        echo '<form method="post" action="request_blood.php"><input type="hidden" name="request_id" value="><input type="submit" name="action" value="Delete" class="delete-btn"></form>';
+                        echo '</li>';
+                    }
+                    ?>
+                </ul>
             </div>
         </div>
     </div>

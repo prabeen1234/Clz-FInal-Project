@@ -14,9 +14,19 @@ $user_id = $_SESSION['user_id'];
 // Handle request deletion
 if (isset($_POST['delete_request_id'])) {
     $request_id = $_POST['delete_request_id'];
-    $delete_query = $con->prepare("DELETE FROM requests WHERE id = ? AND user_id = ?");
-    $delete_query->bind_param("ii", $request_id, $user_id);
-    $delete_query->execute();
+    // Check if the request status is Pending before deleting
+    $check_status_query = $con->prepare("SELECT status FROM requests WHERE id = ? AND user_id = ?");
+    $check_status_query->bind_param("ii", $request_id, $user_id);
+    $check_status_query->execute();
+    $status_result = $check_status_query->get_result();
+    if ($status_result->num_rows > 0) {
+        $status_row = $status_result->fetch_assoc();
+        if ($status_row['status'] === 'Pending') {
+            $delete_query = $con->prepare("DELETE FROM requests WHERE id = ? AND user_id = ?");
+            $delete_query->bind_param("ii", $request_id, $user_id);
+            $delete_query->execute();
+        }
+    }
     header("Location: request_list.php");
     exit();
 }
@@ -169,7 +179,7 @@ $requests_result = $requests_query->get_result();
     </style>
     <script>
         function confirmDelete(event) {
-            if (!confirm('Are you sure you want to delete this request?')) {
+            if (!confirm('Are you sure you want to Cancel this request?')) {
                 event.preventDefault(); // Prevent the form from submitting
             }
         }
@@ -207,10 +217,12 @@ $requests_result = $requests_query->get_result();
                             <td><?php echo htmlspecialchars($row['status']); ?></td>
                             <td><?php echo htmlspecialchars($row['created_at']); ?></td>
                             <td>
-                                <form method="post" action="" onsubmit="confirmDelete(event)">
-                                    <input type="hidden" name="delete_request_id" value="<?php echo htmlspecialchars($row['id']); ?>">
-                                    <button type="submit" class="delete-btn">Delete</button>
-                                </form>
+                                <?php if ($row['status'] === 'Pending'): ?>
+                                    <form method="post" action="" onsubmit="confirmDelete(event)">
+                                        <input type="hidden" name="delete_request_id" value="<?php echo htmlspecialchars($row['id']); ?>">
+                                        <button type="submit" class="delete-btn">Cancel</button>
+                                    </form>
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endwhile; ?>
