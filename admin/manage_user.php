@@ -28,8 +28,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
     }
 }
 
-// Fetch users
-$users_result = $userManager->getUsers();
+// Handle user search by mobile number
+$mobile = isset($_GET['mobile']) ? $_GET['mobile'] : '';
+
+if (!empty($mobile)) {
+    $users_result = $userManager->searchUsersByMobile($mobile);
+} else {
+    $users_result = $userManager->getUsers();
+}
 
 if (!$users_result) {
     die("Database query failed: " . $con->error);
@@ -107,6 +113,30 @@ if (!$users_result) {
             color: #333;
         }
 
+        form {
+            margin-bottom: 20px;
+        }
+
+        form input[type="text"] {
+            padding: 10px;
+            width: 250px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        form button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: #2980b9;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -174,21 +204,26 @@ if (!$users_result) {
             <h2>Admin Menu</h2>
             <a href="admin_dashboard.php">Dashboard</a>
             <a href="manage_user.php" class="active">Manage Users</a>
-            <a href="manage_request.php" class="active">Manage Request</a>
+            <a href="manage_request.php" >Manage Request</a>
             <a href="../logout.php" class="logout-btn">Logout</a>
         </div>
 
         <div class="dashboard-content">
             <h2>User Management</h2>
+            <form method="GET" action="manage_user.php">
+                <input type="text" name="mobile" placeholder="Search by Mobile Number" value="<?php echo isset($_GET['mobile']) ? htmlspecialchars($_GET['mobile']) : ''; ?>">
+                <button type="submit">Search</button>
+            </form>
             <table>
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Username</th>
-                        <th>Fullname</th>
+                        <th>Full Name</th>
+                        <th>Age</th>
                         <th>Email</th>
                         <th>Blood Group</th>
                         <th>Role</th>
+                        <th>Mobile</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -196,11 +231,12 @@ if (!$users_result) {
                     <?php while ($user = $users_result->fetch_assoc()): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($user['id']); ?></td>
-                            <td><?php echo htmlspecialchars($user['username']); ?></td>
                             <td><?php echo htmlspecialchars($user['fullname']); ?></td>
+                            <td><?php echo htmlspecialchars($user['age']); ?></td>
                             <td><?php echo htmlspecialchars($user['email']); ?></td>
-                            <td><?php echo htmlspecialchars($user['bloodgroup']); ?></td>
+                            <td><?php echo htmlspecialchars($user['blood_type']); ?></td>
                             <td><?php echo htmlspecialchars($user['role']); ?></td>
+                            <td><?php echo htmlspecialchars($user['mobile']); ?></td>
                             <td class="actions">
                                 <form action="manage_user.php" method="post" style="display:inline;">
                                     <input type="hidden" name="id" value="<?php echo htmlspecialchars($user['id']); ?>">

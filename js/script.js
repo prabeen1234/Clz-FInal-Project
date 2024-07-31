@@ -15,7 +15,7 @@ function carousel() {
 
 function ha(elm)
 {
-window.location = "find_blood.php?bloodgroup="+elm.value;
+window.location = "find_blood.php?blood_type="+elm.value;
 }
 
 

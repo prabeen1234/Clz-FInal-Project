@@ -10,6 +10,10 @@ include '../includes/Config.php';
 $db = new Database();
 $con = $db->getConnection();
 
+// Enable error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 if ($con->connect_error) {
     die('Database connection failed: ' . $con->connect_error);
 }
@@ -29,10 +33,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $mobile = $_POST['phone'];
     $latitude = $_POST['latitude'];
     $longitude = $_POST['longitude'];
+    $age = $_POST['age'];
+    $weight = $_POST['weight'];
 
     // Update user information
-    $update_query = $con->prepare("UPDATE users SET fullname = ?, email = ?, mobile = ?, latitude = ?, longitude = ? WHERE id = ?");
-    $update_query->bind_param("sssddi", $fullname, $email, $mobile, $latitude, $longitude, $user_id);
+    $update_query = $con->prepare("UPDATE users SET fullname = ?, email = ?, mobile = ?, age = ?, weight = ?, latitude = ?, longitude = ? WHERE id = ?");
+    $update_query->bind_param("sssiissi", $fullname, $email, $mobile, $age, $weight, $latitude, $longitude, $user_id);
 
     if ($update_query->execute()) {
         $message = "Profile updated successfully!";
@@ -52,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f0f2f5;
+            background-color: #e9ecef;
             margin: 0;
             padding: 0;
             display: flex;
@@ -69,16 +75,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         .side-menu {
             width: 250px;
-            background-color: #343a40;
+            background-color: #007bff;
             color: #fff;
             padding: 20px;
             height: 100%;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
             flex-shrink: 0;
         }
 
         .side-menu h2 {
-            font-size: 22px;
+            font-size: 24px;
             margin-bottom: 20px;
         }
 
@@ -86,14 +92,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             display: block;
             color: #fff;
             text-decoration: none;
-            padding: 10px;
-            margin: 10px 0;
+            padding: 12px;
+            margin: 8px 0;
             border-radius: 5px;
             transition: background-color 0.3s ease;
         }
 
         .side-menu a.active, .side-menu a:hover {
-            background-color: #007bff;
+            background-color: #0056b3;
         }
 
         .side-menu a.logout-btn {
@@ -111,18 +117,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         .dashboard-content h2 {
-            font-size: 28px;
+            font-size: 30px;
             margin-bottom: 20px;
             color: #333;
         }
 
         .form-container {
-            max-width: 600px;
+            max-width: 650px;
             width: 100%;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         }
 
         .message {
@@ -155,7 +161,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .form-group input, .form-group select {
             width: 100%;
             padding: 12px;
-            border: 1px solid #ddd;
+            border: 1px solid #ced4da;
             border-radius: 5px;
             font-size: 16px;
             box-sizing: border-box;
@@ -178,7 +184,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             height: 400px;
             width: 100%;
             margin-top: 20px;
-            border: 1px solid #ddd;
+            border: 1px solid #ced4da;
             border-radius: 5px;
         }
     </style>
@@ -216,6 +222,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($user['mobile']); ?>" required>
                     </div>
                     <div class="form-group">
+                        <label for="age">Age:</label>
+                        <input type="number" id="age" name="age" value="<?php echo htmlspecialchars($user['age']); ?>" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">Weight:</label>
+                        <input type="number" id="weight" name="weight" value="<?php echo htmlspecialchars($user['weight']); ?>" required>
+                    </div>
+                    <div class="form-group">
                         <label for="latitude">Latitude:</label>
                         <input type="text" id="latitude" name="latitude" value="<?php echo htmlspecialchars($user['latitude']); ?>" readonly required>
                     </div>
@@ -231,7 +245,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
     </div>
-
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCPYMI9P4d29sp8AGl_4z9py1ZEt8YXmcI&callback=initMap" async defer></script>
     <script>
         function initMap() {

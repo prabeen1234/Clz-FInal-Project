@@ -6,16 +6,26 @@ class UserManager {
         $this->con = $con;
     }
 
-    public function deleteUser($userId) {
-        $query = "DELETE FROM users WHERE id = ?";
+    public function deleteUser($id) {
+        // Delete related requests first
+        $stmt = $this->con->prepare("DELETE FROM requests WHERE donor_id = ? OR user_id = ?");
+        $stmt->bind_param("ii", $id, $id);
+        $stmt->execute();
+        $stmt->close();
+
+        // Now delete the user
+        $stmt = $this->con->prepare("DELETE FROM users WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        return $stmt->execute();
+    }
+
+    public function searchUsersByMobile($mobile) {
+        $query = "SELECT * FROM users WHERE mobile LIKE ?";
         $stmt = $this->con->prepare($query);
-        if ($stmt) {
-            $stmt->bind_param("i", $userId);
-            $stmt->execute();
-            return $stmt->affected_rows > 0; // Return true if a row was deleted
-        } else {
-            throw new Exception("Failed to prepare SQL statement");
-        }
+        $searchTerm = '%' . $mobile . '%';
+        $stmt->bind_param('s', $searchTerm);
+        $stmt->execute();
+        return $stmt->get_result();
     }
 
     public function getUsers() {

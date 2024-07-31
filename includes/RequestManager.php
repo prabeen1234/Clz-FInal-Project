@@ -17,7 +17,14 @@ class RequestManager {
             throw new Exception("Failed to prepare SQL statement");
         }
     }
-
+    public function searchRequestsByDonorId($donorId) {
+        $query = "SELECT * FROM requests WHERE donor_id LIKE ?";
+        $stmt = $this->con->prepare($query);
+        $searchTerm = '%' . $donorId . '%';
+        $stmt->bind_param('s', $searchTerm);
+        $stmt->execute();
+        return $stmt->get_result();
+    }
     public function getRequests() {
         $query = "SELECT * FROM requests";
         $result = $this->con->query($query);

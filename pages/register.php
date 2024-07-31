@@ -20,136 +20,153 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register</title>
-<style>
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f6f9;
-    color: #333;
-    margin: 0;
-    padding: 0;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e9ecef;
+            color: #495057;
+            margin: 0;
+            padding: 0;
+        }
 
-.register {
-    background-color: #ffffff;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 600px;
-    margin: 50px auto;
-    text-align: left;
-    border: 1px solid #ddd;
-}
+        .register {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 700px;
+            margin: 50px auto;
+            border: 1px solid #ced4da;
+        }
 
-.register h2 {
-    margin-bottom: 20px;
-    font-size: 28px;
-    color: #007bff;
-    text-align: center;
-}
+        .register h2 {
+            margin-bottom: 25px;
+            font-size: 32px;
+            color: #007bff;
+            text-align: center;
+        }
 
-.register label {
-    display: block;
-    margin: 15px 0 5px;
-    font-weight: bold;
-    color: #555;
-}
+        .register label {
+            display: block;
+            margin: 15px 0 5px;
+            font-weight: 600;
+            color: #343a40;
+        }
 
-.register input[type="text"],
-.register input[type="email"],
-.register input[type="password"],
-.register input[type="number"],
-.register select {
-    width: calc(100% - 20px);
-    padding: 12px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 16px;
-    box-sizing: border-box;
-    background-color: #e9f5ff;
-}
+        .register input[type="text"],
+        .register input[type="email"],
+        .register input[type="password"],
+        .register input[type="number"],
+        .register select {
+            width: calc(100% - 24px);
+            padding: 14px;
+            margin: 8px 0;
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            background-color: #f8f9fa;
+        }
 
-.register input[type="text"]:focus,
-.register input[type="email"]:focus,
-.register input[type="password"]:focus,
-.register input[type="number"]:focus,
-.register select:focus {
-    border-color: #007bff;
-    outline: none;
-}
+        .register input[type="text"]:focus,
+        .register input[type="email"]:focus,
+        .register input[type="password"]:focus,
+        .register input[type="number"]:focus,
+        .register select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
 
-.register button {
-    width: 100%;
-    padding: 15px;
-    border: none;
-    border-radius: 6px;
-    background-color: #007bff;
-    color: #fff;
-    font-size: 18px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
+        .register .password-wrapper {
+            position: relative;
+        }
 
-.register button:hover {
-    background-color: #0056b3;
-}
+        .register .password-wrapper input[type="password"] {
+            padding-right: 45px;
+        }
 
-.alert {
-    margin-top: 20px;
-    padding: 15px;
-    border-radius: 6px;
-    background-color: #f8d7da;
-    color: #721c24;
-    font-size: 16px;
-    border: 1px solid #f5c6cb;
-}
+        .register .password-wrapper .toggle-eye {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #007bff;
+            font-size: 20px;
+        }
 
-#map {
-    height: 400px;
-    width: 100%;
-    margin-top: 20px;
-    border-radius: 8px;
-    border: 2px solid #ddd;
-}
+        .register button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
 
-@media (max-width: 768px) {
-    .register {
-        width: 95%;
-        margin: 20px auto;
-    }
-}
-</style>
+        .register button:hover {
+            background-color: #0056b3;
+        }
+
+        .alert {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8d7da;
+            color: #721c24;
+            font-size: 16px;
+            border: 1px solid #f5c6cb;
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+
+        @media (max-width: 768px) {
+            .register {
+                width: 95%;
+                margin: 20px auto;
+            }
+        }
+    </style>
 </head>
 <body onload="initMap()">
 
 <div class="register">
     <h2><b>Registration Form</b></h2>
-    <form action="register.php" method="post">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required pattern="[a-zA-Z0-9]{4,}" title="Username should be at least 4 characters long and contain only letters and numbers.">
+    <form id="registration-form" action="register.php" method="post">
+        <label for="fullname">Fullname:</label>
+        <input type="text" id="fullname" name="fullname" required oninput="validateForm()">
 
         <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required pattern=".{8,}" title="Password should be at least 8 characters long.">
-
-        <label for="fullname">Fullname:</label>
-        <input type="text" id="fullname" name="fullname" required>
+        <div class="password-wrapper">
+            <input type="password" id="password" name="password" required pattern=".{8,}" title="Password should be at least 8 characters long." oninput="validateForm()">
+            <span class="toggle-eye" onclick="togglePassword()">👁️</span>
+        </div>
 
         <label for="age">Age:</label>
-        <input type="number" id="age" name="age" required min="1" max="120">
+        <input type="number" id="age" name="age" required min="1" max="120" oninput="validateForm()">
 
         <label for="sex">Sex:</label>
-        <select id="sex" name="sex" required>
+        <select id="sex" name="sex" required oninput="validateForm()">
             <option value="male">Male</option>
             <option value="female">Female</option>
             <option value="other">Other</option>
         </select>
 
-        <label for="bloodgroup">Blood Group:</label>
-        <select name="bloodgroup" required>
+        <label for="blood_type">Blood Group:</label>
+        <select name="blood_type" required oninput="validateForm()">
             <option value="">Select Blood Group</option>
             <option value="Apos">A+</option>
             <option value="Aneg">A-</option>
@@ -159,28 +176,26 @@ body {
             <option value="Oneg">O-</option>
             <option value="ABpos">AB+</option>
             <option value="ABneg">AB-</option>
-            <option value="All">Blood Bank</option>
         </select>
 
         <label for="role">Role:</label>
-        <select name="role" required>
+        <select name="role" required oninput="validateForm()">
             <option value="">Select Role</option>
             <option value="donor">Donor</option>
             <option value="user">User</option>
-            <!-- Add other options here -->
         </select>
 
         <label for="mobile">Mobile:</label>
-        <input type="text" id="mobile" name="mobile" required pattern="\d{10}" title="Mobile number should be 10 digits long.">
+        <input type="text" id="mobile" name="mobile" required maxlength="10" pattern="\d{10}" title="Mobile number should be exactly 10 digits long." oninput="validateForm()">
 
         <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
+        <input type="email" id="email" name="email" required oninput="validateForm()">
 
-        <label for="town">Town:</label>
-        <input type="text" id="town" name="town" required>
+        <label for="weight">Weight:</label>
+        <input type="number" id="weight" name="weight" required oninput="validateForm()">
 
         <label for="state">State:</label>
-        <input type="text" id="state" name="state" required>
+        <input type="text" id="state" name="state" required oninput="validateForm()">
 
         <label for="latitude">Latitude:</label>
         <input type="text" id="latitude" name="latitude" readonly required>
@@ -188,7 +203,7 @@ body {
         <label for="longitude">Longitude:</label>
         <input type="text" id="longitude" name="longitude" readonly required>
 
-        <button type="submit">Register</button>
+        <button type="submit" id="register-btn" disabled>Register</button>
     </form>
     <div id="map"></div>
 </div>
@@ -221,6 +236,33 @@ function initMap() {
         document.getElementById('latitude').value = this.getPosition().lat();
         document.getElementById('longitude').value = this.getPosition().lng();
     });
+}
+
+function togglePassword() {
+    var passwordField = document.getElementById("password");
+    var toggleEye = document.querySelector(".toggle-eye");
+    if (passwordField.type === "password") {
+        passwordField.type = "text";
+        toggleEye.textContent = "🙈";
+    } else {
+        passwordField.type = "password";
+        toggleEye.textContent = "👁️";
+    }
+}
+
+function validateForm() {
+    const form = document.getElementById('registration-form');
+    const button = document.getElementById('register-btn');
+    const inputs = form.querySelectorAll('input[required], select[required]');
+    let isValid = true;
+
+    inputs.forEach(input => {
+        if (!input.checkValidity()) {
+            isValid = false;
+        }
+    });
+
+    button.disabled = !isValid;
 }
 </script>
 </body>

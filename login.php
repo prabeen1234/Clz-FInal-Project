@@ -1,7 +1,6 @@
 <?php
 session_start();
 include 'includes/Config.php'; // Include your configuration file if any
-include 'includes/Database.php';
 include 'includes/Login.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -31,13 +30,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -46,60 +45,78 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             align-items: center;
             height: 100vh;
             margin: 0;
-            background: whitesmoke(135deg, #f6d365 0%, #fda085 100%);
+            background: linear-gradient(135deg, #00bcd4, #2196f3);
+            color: #333;
         }
         .login-container {
-            background: whitesmoke;
+            background: #fff;
             padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 350px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            width: 360px;
             max-width: 90%;
             text-align: center;
         }
         h2 {
-            font-size: 28px;
-            margin-bottom: 20px;
-            color: #333;
+            font-size: 26px;
+            margin-bottom: 25px;
+            color: #2196f3;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
         }
         .form-group {
             margin-bottom: 20px;
-            position: relative;
+            text-align: left;
         }
         .form-group label {
-            display: block;
-            font-size: 16px;
-            margin-bottom: 8px;
-            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #555;
         }
         .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
             font-size: 16px;
+            margin: 0 auto;
+            display: block;
         }
         .form-group input[type="submit"] {
-            background-color: #007bff;
+            background-color: #00bcd4;
             color: white;
             border: none;
             cursor: pointer;
             font-size: 18px;
+            padding: 12px;
+            margin-top: 20px;
             transition: background-color 0.3s ease;
+            width: 100%;
         }
         .form-group input[type="submit"]:hover {
-            background-color: #0056b3;
+            background-color: #007bff;
         }
         .error {
             color: #d9534f;
-            font-size: 16px;
+            font-size: 14px;
             margin-bottom: 20px;
+        }
+        .links {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .links a {
+            color: red;
+            text-decoration: none;
+        }
+        .links a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <h2>Login Your Credentials</h2>
+        <h2>Login</h2>
         <?php if (isset($error)): ?>
             <div class="error"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
@@ -116,8 +133,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <input type="submit" value="Login">
             </div>
         </form>
-        <div>Not Registered?
-            <a href="pages/register.php"><b>Register Now</b></a>
+        <div class="links">
+            <p>Not Registered? <a href="pages/register.php"><b>Register Now</b></a></p>
+            <p>Forgot Password? <a href="pages/forgot_password.php"><b>Click Here</b></a></p>
         </div>
     </div>
 </body>

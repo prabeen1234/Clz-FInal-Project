@@ -19,6 +19,7 @@ $footer = new Footer();
 
 
 </head>
+<title>BLOOD DONATION</title>
 <body>
 
 <div class="col-12" style="height: 650px">
@@ -41,7 +42,7 @@ $footer = new Footer();
 	<span id="info1">Find A Blood Donor</span>
 	<div id="info" class="col-12">
 		<form>
-				<select name="bloodgroup">
+				<select name="blood_type">
 						<option value="">Enter Blood Group</option>
 						<option value="A pos">A+</option>
 						<option value="A neg">A-</option>

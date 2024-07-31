@@ -5,6 +5,10 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
     exit();
 }
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require '../vendor/autoload.php'; // Adjust the path as necessary
 include '../includes/Config.php';
 include '../includes/User.php';
 
@@ -15,25 +19,65 @@ $user = new User($con);
 $user_id = $_SESSION['user_id'];
 $message = '';
 
+// Fetch user latitude and longitude
+$stmt = $con->prepare("SELECT latitude, longitude FROM users WHERE id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$user_location = $result->fetch_assoc();
+
+$user_lat = $user_location['latitude'];
+$user_lng = $user_location['longitude'];
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['request_blood'])) {
         $donor_id = $_POST['donor_id'];
         $blood_type = $_POST['blood_type'];
 
-        if ($user->sendBloodRequest($user_id, $donor_id, $blood_type)) {
+        // Fetch donor's email
+        $stmt = $con->prepare("SELECT email FROM users WHERE id = ?");
+        $stmt->bind_param("i", $donor_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $donor = $result->fetch_assoc();
+
+        if ($user->sendBloodRequest($user_id, $donor_id, $blood_type, $user_lat, $user_lng)) {
             $message = "Blood request sent successfully!";
+
+            // Set up PHPMailer
+            $mail = new PHPMailer(true);
+
+            try { $mail->isSMTP();
+                $mail->Host = 'smtp.gmail.com';
+                $mail->SMTPAuth = true;
+                $mail->Username = 'pubgidws@gmail.com'; // Your email address
+                $mail->Password = 'lcdeiryfjiseeouw'; // Your email password or app-specific passwor
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->Port = 587;
+
+                // Recipients
+                $mail->setFrom('noreply@yourdomain.com', 'Blood Donation System');
+                $mail->addAddress($donor['email']); // Donor's email address
+
+                // Content
+                $mail->isHTML(true);
+                $mail->Subject = 'Blood Request Notification';
+                $mail->Body    = '<p>Dear Donor,</p><p>You have received a new blood request. Please log in to your dashboard to view the details and respond.</p><p>Thank you for your generosity.</p>';
+
+                $mail->send();
+                $message .= " An email notification has been sent to the donor.";
+            } catch (Exception $e) {
+                $message .= " Failed to send email notification. Mailer Error: {$mail->ErrorInfo}";
+            }
         } else {
-            $message = "Failed to send blood request.";
+            $message = "Already Sent Request";
         }
     }
 }
 
 if (isset($_POST['search'])) {
     $blood_type = $_POST['blood_type'];
-    $latitude = $_POST['latitude'];
-    $longitude = $_POST['longitude'];
-
-    $donors_result = $user->searchDonors($blood_type, $latitude, $longitude);
+    $donors_result = $user->searchDonors($blood_type, $user_lat, $user_lng, 5); // Limit to 5 nearest donors
 } else {
     $donors_result = [];
 }
@@ -43,14 +87,14 @@ if (isset($_POST['search'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="../css/style.css">
+    <title>Search Blood</title>
     <style>
-        /* Existing CSS styles */
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #f8b500, #f6d365);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
         }
         .dashboard {
             display: flex;
@@ -58,163 +102,139 @@ if (isset($_POST['search'])) {
         }
         .side-menu {
             width: 250px;
-            background: #333;
+            background: linear-gradient(135deg, #3a3a3a, #222);
             color: #fff;
-            padding: 20px;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
         }
         .side-menu h2 {
-            margin: 0;
-            padding: 0;
-            font-size: 24px;
-            text-align: center;
+            font-size: 26px;
+            margin-bottom: 20px;
         }
         .side-menu a {
-            display: block;
             color: #fff;
-            padding: 10px;
             text-decoration: none;
-            margin: 10px 0;
+            padding: 10px 20px;
+            margin: 5px 0;
             border-radius: 5px;
-            transition: background 0.3s;
+            width: 80%;
+            text-align: center;
+            transition: background 0.3s ease;
         }
-        .side-menu a:hover {
-            background: #575757;
+        .side-menu a:hover,
+        .side-menu a.active {
+            background-color: #007bff;
         }
-        .logout-btn {
-            background: #f44336;
+        .side-menu a.logout-btn {
+            background-color: #f44336;
         }
         .dashboard-content {
-            flex: 1;
-            padding: 20px;
-            background: #f9f9f9;
+            flex-grow: 1;
+            padding: 30px;
+            background-color: #f0f2f5;
+            overflow-y: auto;
         }
         .dashboard-content h2 {
-            margin-top: 0;
+            color: #444;
+            margin-bottom: 20px;
         }
         .form-container {
-            background: #fff;
+            background-color: #fff;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        .form-container .form-group {
-            margin-bottom: 15px;
-        }
-        .form-container label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .form-container input[type="text"],
-        .form-container select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        .form-container input[type="submit"] {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            background: #f8b500;
-            color: #fff;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .form-container input[type="submit"]:hover {
-            background: #f6d365;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            max-width: 600px;
+            margin: auto;
         }
         .message {
-            background: #dff0d8;
-            color: #3c763d;
-            padding: 10px;
-            border-radius: 5px;
+            color: green;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .form-group {
             margin-bottom: 20px;
-            border: 1px solid #d6e9c6;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .form-group select, .form-group input[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .form-group input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .form-group input[type="submit"]:hover {
+            background-color: #0056b3;
         }
         .request-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 30px;
         }
         .request-table th, .request-table td {
             border: 1px solid #ddd;
-            padding: 10px;
+            padding: 12px;
             text-align: left;
         }
         .request-table th {
-            background: #f8b500;
+            background-color: #f8f9fa;
+        }
+        .actions form {
+            display: inline-block;
+        }
+        .actions button,
+        .actions input[type="submit"] {
+            background-color: #28a745;
             color: #fff;
-        }
-        .request-table tr:nth-child(even) {
-            background: #f9f9f9;
-        }
-        .request-table .actions {
-            text-align: center;
-        }
-        .request-table .actions form {
-            display: inline;
-        }
-        .request-table .actions input[type="submit"] {
-            background: #4CAF50;
-            color: #fff;
+            padding: 8px 15px;
             border: none;
-            padding: 5px 10px;
             border-radius: 5px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: background 0.3s ease;
         }
-        .request-table .actions input[type="submit"]:hover {
-            background: #45a049;
+        .actions button:hover,
+        .actions input[type="submit"]:hover {
+            background-color: #218838;
         }
-        #map {
-            height: 400px;
-            width: 100%;
+        .donor-details {
+            display: none;
+            background-color: #f9f9f9;
             border: 1px solid #ddd;
+            margin-top: 10px;
+            padding: 10px;
             border-radius: 5px;
         }
+        .donor-details p {
+            margin: 5px 0;
+        }
     </style>
-    <title>Search Blood</title>
-    
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCPYMI9P4d29sp8AGl_4z9py1ZEt8YXmcI&callback=initMap" async defer></script>
-<script>
-function initMap() {
-const map = new google.maps.Map(document.getElementById('map'), {
-zoom: 8,
-center: {lat: 27.7172, lng: 85.3240}
-});
-
-const marker = new google.maps.Marker({
-map: map,
-draggable: true,
-position: {lat: 27.7172, lng: 85.3240}
-});
-
-google.maps.event.addListener(map, 'click', function(event) {
-const lat = event.latLng.lat();
-const lng = event.latLng.lng();
-
-document.getElementById('latitude').value = lat;
-document.getElementById('longitude').value = lng;
-
-marker.setPosition(event.latLng);
-});
-
-google.maps.event.addListener(marker, 'dragend', function(event) {
-document.getElementById('latitude').value = this.getPosition().lat();
-document.getElementById('longitude').value = this.getPosition().lng();
-});
-}
-</script>
+    <script>
+        function showDonorDetails(id) {
+            var details = document.getElementById('donor-details-' + id);
+            details.style.display = details.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
 </head>
 <body>
     <div class="dashboard">
         <div class="side-menu">
             <h2>Dashboard</h2>
-            <a href="user_dashboard.php">Search Blood</a>
+            <a href="user_dashboard.php">Dashboard</a>
+            <a href="search_blood.php" class="active">Search Blood</a>
             <a href="request_list.php">View Requests</a>
+            <a href="update_profile.php">Update Profile</a>
             <a href="../logout.php" class="logout-btn">Logout</a>
         </div>
 
@@ -237,23 +257,12 @@ document.getElementById('longitude').value = this.getPosition().lng();
                             <option value="Oneg">O-</option>
                             <option value="ABpos">AB+</option>
                             <option value="ABneg">AB-</option>
-                            <option value="All">Blood Bank</option>
                         </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="latitude">Latitude:</label>
-                        <input type="text" id="latitude" name="latitude" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="longitude">Longitude:</label>
-                        <input type="text" id="longitude" name="longitude" required>
                     </div>
                     <div class="form-group">
                         <input type="submit" name="search" value="Search Donors">
                     </div>
                 </form>
-
-                <div id="map"></div>
 
                 <?php if (!empty($donors_result)): ?>
                     <h3>Available Donors</h3>
@@ -271,15 +280,21 @@ document.getElementById('longitude').value = this.getPosition().lng();
                             <?php foreach ($donors_result as $row): ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($row['id']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['bloodgroup']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['blood_type']); ?></td>
                                     <td><?php echo htmlspecialchars($row['fullname']); ?></td>
                                     <td><?php echo number_format($row['distance'], 2); ?></td>
                                     <td class="actions">
-                                        <form action="search_blood.php" method="post" style="display:inline;">
-                                            <input type="hidden" name="donor_id" value="<?php echo htmlspecialchars($row['id']); ?>">
-                                            <input type="hidden" name="blood_type" value="<?php echo htmlspecialchars($row['bloodgroup']); ?>">
-                                            <input type="submit" name="request_blood" value="Request Blood">
-                                        </form>
+                                        <button onclick="showDonorDetails(<?php echo $row['id']; ?>)">View Details</button>
+                                        <div id="donor-details-<?php echo $row['id']; ?>" class="donor-details">
+                                            <p><strong>Full Name:</strong> <?php echo htmlspecialchars($row['fullname']); ?></p>
+                                            <p><strong>Age:</strong> <?php echo htmlspecialchars($row['age']); ?></p>
+                                            <p><strong>Weight:</strong> <?php echo number_format($row['weight'], 2); ?> kg</p>
+                                            <form action="search_blood.php" method="post">
+                                                <input type="hidden" name="donor_id" value="<?php echo htmlspecialchars($row['id']); ?>">
+                                                <input type="hidden" name="blood_type" value="<?php echo htmlspecialchars($row['blood_type']); ?>">
+                                                <input type="submit" name="request_blood" value="Request Blood">
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

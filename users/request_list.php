@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id'])) {
 
 include '../includes/Config.php';
 $db = new Database();
-$con = $db->getConnection();
+$conn = $db->getConnection();
 
 $user_id = $_SESSION['user_id'];
 
@@ -15,14 +15,14 @@ $user_id = $_SESSION['user_id'];
 if (isset($_POST['delete_request_id'])) {
     $request_id = $_POST['delete_request_id'];
     // Check if the request status is Pending before deleting
-    $check_status_query = $con->prepare("SELECT status FROM requests WHERE id = ? AND user_id = ?");
+    $check_status_query = $conn->prepare("SELECT status FROM requests WHERE id = ? AND user_id = ?");
     $check_status_query->bind_param("ii", $request_id, $user_id);
     $check_status_query->execute();
     $status_result = $check_status_query->get_result();
     if ($status_result->num_rows > 0) {
         $status_row = $status_result->fetch_assoc();
         if ($status_row['status'] === 'Pending') {
-            $delete_query = $con->prepare("DELETE FROM requests WHERE id = ? AND user_id = ?");
+            $delete_query = $conn->prepare("DELETE FROM requests WHERE id = ? AND user_id = ?");
             $delete_query->bind_param("ii", $request_id, $user_id);
             $delete_query->execute();
         }
@@ -32,7 +32,7 @@ if (isset($_POST['delete_request_id'])) {
 }
 
 // Fetch user requests
-$requests_query = $con->prepare("SELECT * FROM requests WHERE user_id = ?");
+$requests_query = $conn->prepare("SELECT * FROM requests WHERE user_id = ?");
 $requests_query->bind_param("i", $user_id);
 $requests_query->execute();
 $requests_result = $requests_query->get_result();
@@ -190,6 +190,7 @@ $requests_result = $requests_query->get_result();
         <div class="side-menu">
             <h2>User Menu</h2>
             <a href="user_dashboard.php">Dashboard</a>
+            <a href="search_blood.php">Search Blood</a>
             <a href="request_list.php" class="active">My Requests</a>
             <a href="../logout.php" class="logout-btn">Logout</a>
         </div>

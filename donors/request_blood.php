@@ -49,8 +49,12 @@ $user_query->execute();
 $user_result = $user_query->get_result();
 $user = $user_result->fetch_assoc();
 
+// Extract latitude and longitude
+$user_latitude = $user['latitude'];
+$user_longitude = $user['longitude'];
+
 // Fetch blood requests
-$requests_query = "SELECT * FROM requests WHERE status = 'Pending'";
+$requests_query = "SELECT * FROM requests WHERE status = 'Pending' AND donor_id = $user_id";
 $requests_result = $con->query($requests_query);
 
 // Fetch accepted requests
@@ -68,6 +72,26 @@ $accepted_requests = $accepted_requests_result->fetch_all(MYSQLI_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Donor Dashboard - Blood Requests</title>
     <link rel="stylesheet" type="text/css" href="../css/style.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCPYMI9P4d29sp8AGl_4z9py1ZEt8YXmcI&callback=initMap" async defer></script>
+    <script>
+        function initMap() {
+            var mapOptions = {
+                zoom: 12,
+                center: { lat: parseFloat('<?php echo $user_latitude; ?>'), lng: parseFloat('<?php echo $user_longitude; ?>') }
+            };
+            var map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+            var marker = new google.maps.Marker({
+                position: { lat: parseFloat('<?php echo $user_latitude; ?>'), lng: parseFloat('<?php echo $user_longitude; ?>') },
+                map: map,
+                title: 'User Location'
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+        });
+    </script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -89,7 +113,7 @@ $accepted_requests = $accepted_requests_result->fetch_all(MYSQLI_ASSOC);
         .side-menu {
             width: 250px;
             background-color: #343a40;
-      h     color: #fff;
+            color: #fff;
             padding: 20px;
             height: 100%;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
@@ -276,27 +300,17 @@ $accepted_requests = $accepted_requests_result->fetch_all(MYSQLI_ASSOC);
             border: 1px solid #ddd;
             border-radius: 5px;
             margin-bottom: 10px;
-            font-size: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .accepted-requests ul li span {
-            margin-right: 10px;
+            display: block;
         }
 
-        .accepted-requests ul li .delete-btn {
+        .accepted-requests ul li form input[type="submit"].delete-btn {
             background-color: #dc3545;
-            color: white;
-            border: none;
-            cursor: pointer;
-            padding: 8px 12px;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
         }
 
-        .accepted-requests ul li .delete-btn:hover {
+        .accepted-requests ul li form input[type="submit"].delete-btn:hover {
             background-color: #c82333;
         }
     </style>
@@ -305,27 +319,30 @@ $accepted_requests = $accepted_requests_result->fetch_all(MYSQLI_ASSOC);
     <div class="dashboard">
         <div class="side-menu">
             <h2>Dashboard</h2>
-
             <a href="update_profile.php">Update Profile</a>
             <a href="request_blood.php" class="active">Blood Requests</a>
             <a href="../logout.php" class="logout-btn">Logout</a>
         </div>
         <div class="dashboard-content">
             <h2>Blood Requests</h2>
+            <div id="map" style="height: 400px; width: 100%; margin-top: 20px;"></div>
             <?php
             if ($requests_result->num_rows > 0) {
                 echo '<table class="request-table">';
-                echo '<thead><tr><th>Requester Id</th><th>Created At</th><th>Status</th><th>Actions</th></tr></thead>';
+                echo '<thead><tr><th>Requester Id</th><th>Created At</th><th>Status</th><th>Blood Group</th><th>Actions</th></tr></thead>';
                 echo '<tbody>';
                 while ($row = $requests_result->fetch_assoc()) {
                     echo '<tr>';
                     echo '<td>' . $row['user_id'] . '</td>';
                     echo '<td>' . $row['created_at'] . '</td>';
                     echo '<td>' . $row['status'] . '</td>';
+                    echo '<td>' . $row['blood_type'] . '</td>';
                     echo '<td class="actions">';
-                    echo '<form method="post" action="request_blood.php"><input type="hidden" name="request_id" value="' . $row['id'] . '"><input type="submit" name="action" value="Accept"></form>';
-                    echo '<form method="post" action="request_blood.php"><input type="hidden" name="request_id" value="' . $row['id'] . '"><input type="submit" name="action" value="Reject" class="reject-btn"></form>';
-
+                    echo '<form method="get" action="user_detail.php">';
+                    echo '<input type="hidden" name="request_id" value="' . $row['id'] . '">';
+                    echo '<input type="hidden" name="user_id" value="' . $row['user_id'] . '">';
+                    echo '<input type="submit" value="View Details">';
+                    echo '</form>';
                     echo '</td>';
                     echo '</tr>';
                 }
@@ -336,21 +353,25 @@ $accepted_requests = $accepted_requests_result->fetch_all(MYSQLI_ASSOC);
             }
             ?>
             <div class="accepted-requests">
-                <h3>Accepted Requests</h3>
-                <ul>
-                    <?php
-                    foreach ($accepted_requests as $request) {
-                        echo '<th><b>Request Id</b></th>';
-                        echo '<li>';
-                        echo '<span>' . $request['id'] . ' </span>';
-                        echo '<span>' . $request['created_at'] . ' </span>';
-                        echo '<span><b>Please Visit Nearby Hospital or Blood Bank <br>As Soon as Possible!!!!!!</b> </span>';
-                        echo '<form method="post" action="request_blood.php"><input type="hidden" name="request_id" value="><input type="submit" name="action" value="Delete" class="delete-btn"></form>';
-                        echo '</li>';
-                    }
-                    ?>
-                </ul>
-            </div>
+    <h3>Accepted Requests</h3>
+    <ul>
+        <?php
+        foreach ($accepted_requests as $request) {
+            echo '<li>';
+            echo '<span>Request ID: ' . $request['id'] . '</span>';
+            echo '<span>Created At: ' . $request['created_at'] . '</span>';
+            echo '<span><b>Please Visit Nearby Hospital or Blood Bank For Blood Donation <br>As Soon as Possible!!!!!!</b></span>';
+            echo '<form method="get" action="user_detail.php">';
+            echo '<input type="hidden" name="request_id" value="' . $request['id'] . '">';
+            echo '<input type="hidden" name="user_id" value="' . $request['user_id'] . '">';
+            echo '<input type="submit" value="View Details" style="background-color: gray; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; transition: background-color 0.3s ease;">';
+            echo '</form>';
+            echo '</li>';
+            
+        }
+        ?>
+    </ul>
+</div>
         </div>
     </div>
 </body>
