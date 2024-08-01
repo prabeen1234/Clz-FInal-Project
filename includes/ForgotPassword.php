@@ -1,6 +1,8 @@
 <?php
 require '../vendor/autoload.php'; // Adjust path as needed
+require'../includes/EmailService.php';
 
+use App\Services\EmailService;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -41,32 +43,17 @@ class ForgotPassword {
                 return "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
             }
 
-            $mail = new PHPMailer(true);
+            // Use EmailService to send the OTP
             try {
-                $mail->isSMTP();
-                $mail->Host = 'smtp.gmail.com';
-                $mail->SMTPAuth = true;
-                $mail->Username = 'pubgidws@gmail.com'; // Your email address
-                $mail->Password = 'lcdeiryfjiseeouw'; // Your email password or app-specific password
-                $mail->SMTPSecure = 'tls';
-                $mail->Port = 587;
-
-                $mail->setFrom('your-email@gmail.com', 'Blood Donation Management System');
-                $mail->addAddress($email); // Recipient's email address
-
-                $mail->isHTML(true);
-                $mail->Subject = 'Password Reset OTP';
-                $mail->Body = "<p>Your OTP for password reset is: <strong>$otp</strong></p>";
-                $mail->AltBody = "Your OTP for password reset is: $otp";
-
-                $mail->send();
+                $emailService = new EmailService();
+                $emailService->sendOtpEmail($email, $otp);
                 $_SESSION['otp_sent'] = true;
                 $_SESSION['email'] = $email;
                 session_write_close();
                 header("Location: ../pages/reset_password.php");
                 exit();
             } catch (Exception $e) {
-                error_log("Mailer Error: " . $mail->ErrorInfo);
+                error_log("Mailer Error: " . $e->getMessage());
                 return "Failed to send the OTP. Please try again later.";
             }
         } else {

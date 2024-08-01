@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 
 // Include required files
 require '../includes/ForgotPassword.php';
-require '../includes/Config.php';
+require '../includes/Config.php'; // Ensure Database connection settings are properly configured
 
 // Initialize the ForgotPassword class
 $forgotPassword = new ForgotPassword();
@@ -22,9 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error_message = "Please enter your email address.";
     }
 }
-?>
-
-<!DOCTYPE html>
+?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -32,20 +30,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Forgot Password</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
             margin: 0;
+            color: #333;
         }
         .container {
             background-color: white;
-            padding: 20px;
+            padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             width: 400px;
+            text-align: center;
         }
         h2 {
             margin-top: 0;
@@ -54,6 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         label {
             display: block;
             margin: 10px 0 5px;
+            color: #555;
         }
         input[type="email"] {
             width: 100%;
@@ -61,19 +62,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             margin: 5px 0 20px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            box-sizing: border-box;
         }
         button {
             width: 100%;
             padding: 10px;
-            background-color: #007bff;
+            background-color: #6a11cb;
             border: none;
             border-radius: 5px;
             color: white;
             font-size: 16px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #4a00e0;
         }
         .error {
             color: red;

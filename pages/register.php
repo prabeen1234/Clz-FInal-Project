@@ -1,12 +1,18 @@
 <?php
+use App\Services\EmailService;
 session_start();
 require '../includes/Config.php';
 require '../includes/Register.php';
+require '../vendor/autoload.php'; // Adjust path as needed
+
+require '../includes/EmailService.php';
+use PHPMailer\PHPMailer\Exception;
 
 // Enable error reporting
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
 
 $db = new Database();
 $con = $db->getConnection(); // Initialize the database connection
@@ -14,7 +20,22 @@ $con = $db->getConnection(); // Initialize the database connection
 $register = new Register($con); // Pass the connection to Register class
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $register->handleRegistration($_POST);
+    try {
+        $otp = rand(100000, 999999); // Generate a 6-digit OTP
+        $_SESSION['otp'] = $otp; // Store OTP in session
+        $_SESSION['registration_data'] = $_POST; // Store registration data
+
+        // Send OTP to user's email
+        $email = $_POST['email'];
+        $emailService = new EmailService();
+        $emailService->sendOtpEmail($email, $otp);
+
+        // Redirect to OTP verification page
+        header("Location: verify_otp.php");
+        exit;
+    } catch (Exception $e) {
+        echo "An error occurred: " . $e->getMessage();
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -140,9 +161,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
     </style>
-</head>
-<body onload="initMap()">
-
 <div class="register">
     <h2><b>Registration Form</b></h2>
     <form id="registration-form" action="register.php" method="post">
