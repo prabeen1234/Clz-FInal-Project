@@ -1,6 +1,6 @@
 <?php
 require '../vendor/autoload.php'; // Adjust path as needed
-require'../includes/EmailService.php';
+require '../includes/EmailService.php';
 
 use App\Services\EmailService;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -43,7 +43,6 @@ class ForgotPassword {
                 return "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
             }
 
-            // Use EmailService to send the OTP
             try {
                 $emailService = new EmailService();
                 $emailService->sendOtpEmail($email, $otp);

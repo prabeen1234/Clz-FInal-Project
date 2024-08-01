@@ -13,28 +13,37 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-
 $db = new Database();
 $con = $db->getConnection(); // Initialize the database connection
 
 $register = new Register($con); // Pass the connection to Register class
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    try {
-        $otp = rand(100000, 999999); // Generate a 6-digit OTP
-        $_SESSION['otp'] = $otp; // Store OTP in session
-        $_SESSION['registration_data'] = $_POST; // Store registration data
+    $mobile = $_POST['mobile'];
+    $email = $_POST['email'];
 
-        // Send OTP to user's email
-        $email = $_POST['email'];
-        $emailService = new EmailService();
-        $emailService->sendOtpEmail($email, $otp);
+    // Check if the mobile or email is already registered
+    if ($register->isPhoneRegistered($mobile) || $register->isEmailRegistered($email)) {
+        echo '<script>
+                alert("Mobile or Email is already registered");
+                window.location.href = "../login.php";
+              </script>';
+    } else {
+        try {
+            $otp = rand(100000, 999999); // Generate a 6-digit OTP
+            $_SESSION['otp'] = $otp; // Store OTP in session
+            $_SESSION['registration_data'] = $_POST; // Store registration data
 
-        // Redirect to OTP verification page
-        header("Location: verify_otp.php");
-        exit;
-    } catch (Exception $e) {
-        echo "An error occurred: " . $e->getMessage();
+            // Send OTP to user's email
+            $emailService = new EmailService();
+            $emailService->sendOtpEmail($email, $otp);
+
+            // Redirect to OTP verification page
+            header("Location: verify_otp.php");
+            exit;
+        } catch (Exception $e) {
+            echo "An error occurred: " . $e->getMessage();
+        }
     }
 }
 ?>
@@ -161,6 +170,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
     </style>
+</head>
+<body>
 <div class="register">
     <h2><b>Registration Form</b></h2>
     <form id="registration-form" action="register.php" method="post">
@@ -204,7 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </select>
 
         <label for="mobile">Mobile:</label>
-        <input type="text" id="mobile" name="mobile" required maxlength="10" pattern="\d{10}" title="Mobile number should be exactly 10 digits long." oninput="validateForm()">
+        <input type="text" id="mobile" name="mobile" required maxlength="10" pattern="9\d{9}" title="Mobile number should start with 9 and be exactly 10 digits long." oninput="validateForm()">
 
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required oninput="validateForm()">
