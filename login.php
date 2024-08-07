@@ -104,12 +104,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .links {
             margin-top: 20px;
             font-size: 14px;
+            display: flex;
+            justify-content: space-between;
         }
         .links a {
-            color: red;
             text-decoration: none;
         }
-        .links a:hover {
+        .register-link a {
+            color: #00bcd4;
+        }
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+        .forgot-password-link a {
+            color: #ff5722;
+        }
+        .forgot-password-link a:hover {
             text-decoration: underline;
         }
     </style>
@@ -134,8 +144,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </form>
         <div class="links">
-            <p>Not Registered? <a href="pages/register.php"><b>Register Now</b></a></p>
-            <p>Forgot Password? <a href="pages/forgot_password.php"><b>Click Here</b></a></p>
+            <div class="register-link">
+                <p>Not Registered? <a href="pages/register.php"><b>Register Now</b></a></p>
+            </div>
+            <div class="forgot-password-link">
+                <p>Forgot Password? <a href="pages/forgot_password.php"><b>Click Here</b></a></p>
+            </div>
         </div>
     </div>
 </body>

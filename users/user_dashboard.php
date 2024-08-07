@@ -78,7 +78,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
     <div class="dashboard">
         <div class="side-menu">
             <h2>User Dashboard</h2>
-            <a href="search_blood.php" class="active">Search Blood</a>
+            <a href="user_dashboard.php" class="active">Dashboard</a>
+            <a href="search_blood.php">Search Blood</a>
             <a href="request_list.php">View Requests</a>
             <a href="update_profile.php">Update Profile</a>
             <a href="../logout.php" class="logout-btn">Logout</a>
