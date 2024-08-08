@@ -191,82 +191,89 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Update Profile</title>
 </head>
 <body>
-<div class="dashboard"> <div class="side-menu"> <h2>User Menu</h2> <a href="user_dashboard.php" >Search Blood</a> <a href="request_list.php">View Requests</a> <a href="update_profile.php" class="active">Update Profile</a> <a href="../logout.php" class="logout-btn">Logout</a> </div>
+<div class="dashboard">
+    <div class="side-menu">
+        <h2>User Menu</h2>
+        <a href="user_dashboard.php">Search Blood</a>
+        <a href="request_list.php">View Requests</a>
+        <a href="update_profile.php" class="active">Update Profile</a>
+        <a href="../logout.php" class="logout-btn">Logout</a>
+    </div>
 
-        <div class="dashboard-content">
-            <h2>Update Your Information</h2>
-            <div class="form-container">
-                <?php if (isset($message)): ?>
-                    <div class="message <?php echo htmlspecialchars($message_type); ?>">
-                        <?php echo htmlspecialchars($message); ?>
-                    </div>
-                <?php endif; ?>
-                <form action="update_profile.php" method="post">
-                    <div class="form-group">
-                        <label for="name">Name:</label>
-                        <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($user['fullname']); ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email:</label>
-                        <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Phone:</label>
-                        <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($user['mobile']); ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="age">Age:</label>
-                        <input type="number" id="age" name="age" value="<?php echo htmlspecialchars($user['age']); ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="weight">Weight:</label>
-                        <input type="number" id="weight" name="weight" value="<?php echo htmlspecialchars($user['weight']); ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="latitude">Latitude:</label>
-                        <input type="text" id="latitude" name="latitude" value="<?php echo htmlspecialchars($user['latitude']); ?>" readonly required>
-                    </div>
-                    <div class="form-group">
-                        <label for="longitude">Longitude:</label>
-                        <input type="text" id="longitude" name="longitude" value="<?php echo htmlspecialchars($user['longitude']); ?>" readonly required>
-                    </div>
-                    <div id="map"></div>
-                    <div class="form-group">
-                        <input type="submit" value="Update Info">
-                    </div>
-                </form>
-            </div>
+    <div class="dashboard-content">
+        <h2>Update Your Information</h2>
+        <div class="form-container">
+            <?php if (isset($message)): ?>
+                <div class="message <?php echo htmlspecialchars($message_type); ?>">
+                    <?php echo htmlspecialchars($message); ?>
+                </div>
+            <?php endif; ?>
+            <form action="update_profile.php" method="post">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($user['fullname']); ?>" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone:</label>
+                    <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($user['mobile']); ?>" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="age">Age:</label>
+                    <input type="number" id="age" name="age" value="<?php echo htmlspecialchars($user['age']); ?>" required>
+                </div>
+                <div class="form-group">
+                    <label for="weight">Weight:</label>
+                    <input type="number" id="weight" name="weight" value="<?php echo htmlspecialchars($user['weight']); ?>" required>
+                </div>
+                <div class="form-group">
+                    <label for="latitude">Latitude:</label>
+                    <input type="text" id="latitude" name="latitude" value="<?php echo htmlspecialchars($user['latitude']); ?>" readonly required>
+                </div>
+                <div class="form-group">
+                    <label for="longitude">Longitude:</label>
+                    <input type="text" id="longitude" name="longitude" value="<?php echo htmlspecialchars($user['longitude']); ?>" readonly required>
+                </div>
+                <div id="map"></div>
+                <div class="form-group">
+                    <input type="submit" value="Update Info">
+                </div>
+            </form>
         </div>
     </div>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCPYMI9P4d29sp8AGl_4z9py1ZEt8YXmcI&callback=initMap" async defer></script>
-    <script>
-        function initMap() {
-            const map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 8,
-                center: {lat: <?php echo htmlspecialchars($user['latitude']); ?>, lng: <?php echo htmlspecialchars($user['longitude']); ?>}
-            });
+</div>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCPYMI9P4d29sp8AGl_4z9py1ZEt8YXmcI&callback=initMap" async defer></script>
+<script>
+    function initMap() {
+        const map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 8,
+            center: {lat: <?php echo htmlspecialchars($user['latitude']); ?>, lng: <?php echo htmlspecialchars($user['longitude']); ?>}
+        });
 
-            const marker = new google.maps.Marker({
-                map: map,
-                draggable: true,
-                position: {lat: <?php echo htmlspecialchars($user['latitude']); ?>, lng: <?php echo htmlspecialchars($user['longitude']); ?>}
-            });
+        const marker = new google.maps.Marker({
+            map: map,
+            draggable: true,
+            position: {lat: <?php echo htmlspecialchars($user['latitude']); ?>, lng: <?php echo htmlspecialchars($user['longitude']); ?>}
+        });
 
-            google.maps.event.addListener(map, 'click', function(event) {
-                const lat = event.latLng.lat();
-                const lng = event.latLng.lng();
+        google.maps.event.addListener(map, 'click', function(event) {
+            const lat = event.latLng.lat();
+            const lng = event.latLng.lng();
 
-                document.getElementById('latitude').value = lat;
-                document.getElementById('longitude').value = lng;
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lng;
 
-                marker.setPosition(event.latLng);
-            });
+            marker.setPosition(event.latLng);
+        });
 
-            google.maps.event.addListener(marker, 'dragend', function(event) {
-                document.getElementById('latitude').value = this.getPosition().lat();
-                document.getElementById('longitude').value = this.getPosition().lng();
-            });
-        }
-    </script>
+        google.maps.event.addListener(marker, 'dragend', function(event) {
+            document.getElementById('latitude').value = this.getPosition().lat();
+            document.getElementById('longitude').value = this.getPosition().lng();
+        });
+    }
+</script>
 </body>
 </html>

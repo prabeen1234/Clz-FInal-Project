@@ -211,15 +211,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <form action="update_profile.php" method="post">
                     <div class="form-group">
                         <label for="name">Name:</label>
-                        <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($user['fullname']); ?>" required>
+                        <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($user['fullname']); ?>" required disabled>
+                        <input type="hidden" name="name" value="<?php echo htmlspecialchars($user['fullname']); ?>">
                     </div>
                     <div class="form-group">
                         <label for="email">Email:</label>
-                        <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
+                        <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required disabled>
+                        <input type="hidden" name="email" value="<?php echo htmlspecialchars($user['email']); ?>">
                     </div>
                     <div class="form-group">
                         <label for="phone">Phone:</label>
-                        <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($user['mobile']); ?>" required>
+                        <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($user['mobile']); ?>" required disabled>
+                        <input type="hidden" name="phone" value="<?php echo htmlspecialchars($user['mobile']); ?>">
                     </div>
                     <div class="form-group">
                         <label for="age">Age:</label>
