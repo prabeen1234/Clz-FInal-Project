@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $action = $_POST['action'];
 
     if ($action === 'Accept') {
-        $update_query = $con->prepare("UPDATE requests SET status = 'Accepted', donor_id = ? WHERE id = ?");
+        $update_query = $con->prepare("UPDATE requests SET status = 'Accepted', donor_id = ?, accepted_date = NOW() WHERE id = ?");
         $update_query->bind_param("ii", $user_id, $request_id);
     } else if ($action === 'Reject') {
         $update_query = $con->prepare("UPDATE requests SET status = 'Declined', donor_id = ? WHERE id = ?");

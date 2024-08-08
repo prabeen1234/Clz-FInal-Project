@@ -10,9 +10,23 @@ class User {
         $compatibleBloodTypes = $this->getCompatibleBloodTypes($blood_type);
 
         $placeholders = implode(',', array_fill(0, count($compatibleBloodTypes), '?'));
-        $query = "SELECT id, fullname, blood_type, age, weight, latitude, longitude FROM users WHERE role = 'donor' AND blood_type IN ($placeholders)";
+        $query = "
+            SELECT id, fullname, blood_type, age, weight, latitude, longitude 
+            FROM users 
+            WHERE role = 'donor' 
+              AND blood_type IN ($placeholders)
+              AND id NOT IN (
+                  SELECT donor_id 
+                  FROM requests 
+                  WHERE status = 'Accepted' 
+                    AND accepted_date > DATE_SUB(NOW(), INTERVAL 1 MONTH)
+              )
+        ";
 
         $stmt = $this->conn->prepare($query);
+        if ($stmt === false) {
+            die('Prepare failed: ' . htmlspecialchars($this->conn->error));
+        }
         $stmt->bind_param(str_repeat('s', count($compatibleBloodTypes)), ...$compatibleBloodTypes);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -31,6 +45,7 @@ class User {
         return array_slice($donors, 0, $k);
     }
 
+    
     private function getCompatibleBloodTypes($blood_type) {
         $compatibility = [
             'Apos' => ['Apos', 'Aneg', 'Opos', 'Oneg'],
