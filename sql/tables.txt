@@ -1,0 +1,43 @@
+localhost:3306/blood/users/		http://localhost/phpmyadmin/index.php?route=/table/sql&db=blood&table=users
+Your SQL query has been executed successfully.
+
+describe requests;
+
+
+
+id	int	NO	PRI	NULL	auto_increment	
+user_id	int	NO	MUL	NULL		
+donor_id	int	NO	MUL	NULL		
+status	enum('Pending','Accepted','Declined')	YES		Pending		
+created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED	
+latitude	decimal(9,6)	YES		NULL		
+longitude	decimal(9,6)	YES		NULL		
+blood_type	enum('Apos','Aneg','Bpos','Bneg','Opos','Oneg','ABpos','ABneg')	YES		NULL		
+accepted_date	datetime	YES		NULL		
+
+
+localhost:3306/blood/users/		http://localhost/phpmyadmin/index.php?route=/table/sql&db=blood&table=users
+Your SQL query has been executed successfully.
+
+describe users;
+
+
+
+id	int	NO	PRI	NULL	auto_increment	
+password	varchar(100)	NO		NULL		
+fullname	varchar(100)	NO		NULL		
+age	int	NO		NULL		
+sex	varchar(10)	YES		NULL		
+blood_type	enum('Apos','Aneg','Bpos','Bneg','Opos','Oneg','ABpos','ABneg')	YES		NULL		
+mobile	varchar(100)	NO		NULL		
+email	varchar(100)	NO		NULL		
+weight	int	YES		NULL		
+state	varchar(100)	NO		NULL		
+latitude	double(9,6)	YES		NULL		
+longitude	double(9,6)	YES		NULL		
+role	varchar(50)	YES		NULL		
+reset_token	varchar(255)	YES		NULL		
+reset_token_expiry	datetime	YES		NULL		
+otp	varchar(6)	YES		NULL		
+otp_expiry	datetime	YES		NULL		
+
