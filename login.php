@@ -40,92 +40,160 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
-            background: linear-gradient(135deg, #00bcd4, #2196f3);
-            color: #333;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f5f5;
         }
         .login-container {
-            background: #fff;
+            background: lightblue;
             padding: 40px;
             border-radius: 15px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-            width: 360px;
-            max-width: 90%;
+            width: 90%;
+            height: 90vh;
+            max-width: 600px;
+            max-height: 600px;
+            color: #fff;
             text-align: center;
+            position: relative;
+            transition: background-color 0.3s ease;
+        }
+        .login-container:hover {
+            background: linear-gradient(135deg, #2196f3, #ff4081);
         }
         h2 {
-            font-size: 26px;
-            margin-bottom: 25px;
-            color: #2196f3;
+            font-size: 55px; /* Large heading size */
+            margin-bottom: 10px;
+            margin-top: 20px;
             text-transform: uppercase;
             letter-spacing: 1.5px;
+            color: red;
         }
         .form-group {
             margin-bottom: 20px;
             text-align: left;
         }
         .form-group label {
-            font-size: 14px;
-            margin-bottom: 5px;
-            color: #555;
+            font-size: 30px; /* Large label size */
+            margin-bottom: 10px;
+            color: black; /* Label color */
+            font-weight: bold;
         }
         .form-group input {
             width: calc(100% - 20px);
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
+            padding: 12px; /* Input padding */
+            border: 2px solid #ccc;
+            border-radius: 8px; /* Rounded corners */
+            font-size: 18px; /* Input text size */
             margin: 0 auto;
             display: block;
+            color: #333;
+            font-weight: bold;
         }
         .form-group input[type="submit"] {
-            background-color: #00bcd4;
-            color: white;
+            background-color: #ffeb3b; /* Button color */
+            color: #333;
             border: none;
             cursor: pointer;
-            font-size: 18px;
-            padding: 12px;
+            font-size: 20px; /* Button text size */
+            padding: 14px; /* Button padding */
             margin-top: 20px;
-            transition: background-color 0.3s ease;
             width: 100%;
+            display: none;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
         }
         .form-group input[type="submit"]:hover {
-            background-color: #007bff;
+            background-color: #ff4081; /* Button hover color */
+            color: #fff;
         }
         .error {
             color: #d9534f;
-            font-size: 14px;
+            font-size: 16px; /* Error text size */
             margin-bottom: 20px;
         }
         .links {
-            margin-top: 20px;
-            font-size: 14px;
+            margin-top: 30px;
+            font-size: 24px; /* Link text size */
             display: flex;
             justify-content: space-between;
+            flex-wrap: wrap;
+            color: black;
         }
         .links a {
+            color: #ffeb3b; /* Link color */
             text-decoration: none;
+            padding: 8px;
+            color: red;
+            border-radius: 8px;
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
-        .register-link a {
-            color: #00bcd4;
+        .links a:hover {
+            background-color: #ff4081; /* Link hover background */
+            color: #fff; /* Link hover text color */
         }
-        .register-link a:hover {
-            text-decoration: underline;
+        .form-group input.invalid {
+            border-color: #ff4081;
         }
-        .forgot-password-link a {
-            color: #ff5722;
-        }
-        .forgot-password-link a:hover {
-            text-decoration: underline;
-        }
+        /* New Back to Home Button */
+        .back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    text-decoration: none;
+    color: #333;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    background: #f1f1f1;
+    padding: 8px 12px;
+    border-radius: 50px;
+    transition: background 0.3s;
+}
+
+.back-button:hover {
+    background: #007bff;
+    color: #fff;
+}
+
+.back-button i {
+    margin-right: 8px;
+    font-size: 20px;
+}
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const submitButton = document.querySelector('input[type="submit"]');
+
+            function validateForm() {
+                if (emailInput.value && passwordInput.value) {
+                    submitButton.style.display = 'block';
+                } else {
+                    submitButton.style.display = 'none';
+                }
+            }
+
+            emailInput.addEventListener('input', validateForm);
+            passwordInput.addEventListener('input', validateForm);
+
+            validateForm(); // Run initial check
+        });
+    </script>
+    
 </head>
 <body>
+
     <div class="login-container">
+    <a href="index.php" class="back-button">
+            <i>←</i> Back
+        </a>
         <h2>Login</h2>
         <?php if (isset($error)): ?>
             <div class="error"><?php echo htmlspecialchars($error); ?></div>
