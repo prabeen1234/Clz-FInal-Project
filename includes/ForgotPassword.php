@@ -49,7 +49,10 @@ class ForgotPassword {
                 $_SESSION['otp_sent'] = true;
                 $_SESSION['email'] = $email;
                 session_write_close();
-                header("Location: ../pages/reset_password.php");
+                echo '<script>
+                alert("OTP is sent to your email");
+                window.location.href = "../pages/reset_password.php";
+              </script>';
                 exit();
             } catch (Exception $e) {
                 error_log("Mailer Error: " . $e->getMessage());

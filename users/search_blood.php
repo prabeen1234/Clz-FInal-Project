@@ -1,8 +1,8 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
-    header("Location: ../login.php");
-    exit();
+header("Location: ../login.php");
+exit();
 }
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -10,11 +10,9 @@ use PHPMailer\PHPMailer\Exception;
 
 require '../vendor/autoload.php'; // Adjust the path as necessary
 include '../includes/Config.php';
-include '../includes/User.php';
 
 $con = new Database();
 $con = $con->getConnection();
-$user = new User($con);
 
 $user_id = $_SESSION['user_id'];
 $message = '';
@@ -30,56 +28,94 @@ $user_lat = $user_location['latitude'];
 $user_lng = $user_location['longitude'];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (isset($_POST['request_blood'])) {
-        $donor_id = $_POST['donor_id'];
-        $blood_type = $_POST['blood_type'];
+if (isset($_POST['request_blood'])) {
+$donor_id = $_POST['donor_id'];
+$blood_type = $_POST['blood_type'];
 
-        // Fetch donor's email
-        $stmt = $con->prepare("SELECT email FROM users WHERE id = ?");
-        $stmt->bind_param("i", $donor_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $donor = $result->fetch_assoc();
+// Fetch donor's email
+$stmt = $con->prepare("SELECT email FROM users WHERE id = ?");
+$stmt->bind_param("i", $donor_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$donor = $result->fetch_assoc();
 
-        if ($user->sendBloodRequest($user_id, $donor_id, $blood_type, $user_lat, $user_lng)) {
-            $message = "Blood request sent successfully!";
+// Call Python API to send blood request
+$api_url = 'http://localhost:5000/send_blood_request';
+$data = array(
+'user_id' => $user_id,
+'donor_id' => $donor_id,
+'blood_type' => $blood_type,
+'latitude' => $user_lat,
+'longitude' => $user_lng
+);
+$options = array(
+'http' => array(
+'header' => "Content-Type: application/json\r\n",
+'method' => 'POST',
+'content' => json_encode($data)
+)
+);
+$context = stream_context_create($options);
+$response = file_get_contents($api_url, false, $context);
+$response = json_decode($response, true);
 
-            // Set up PHPMailer
-            $mail = new PHPMailer(true);
+if ($response['success']) {
+$message = "Blood request sent successfully!";
 
-            try { $mail->isSMTP();
-                $mail->Host = 'smtp.gmail.com';
-                $mail->SMTPAuth = true;
-                $mail->Username = 'pubgidws@gmail.com'; // Your email address
-                $mail->Password = 'lcdeiryfjiseeouw'; // Your email password or app-specific passwor
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                $mail->Port = 587;
+// Set up PHPMailer
+$mail = new PHPMailer(true);
+try {
+$mail->isSMTP();
+$mail->Host = 'smtp.gmail.com';
+$mail->SMTPAuth = true;
+$mail->Username = 'pubgidws@gmail.com'; // Your email address
+$mail->Password = 'lcdeiryfjiseeouw'; // Your email password or app-specific password
+$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+$mail->Port = 587;
 
-                // Recipients
-                $mail->setFrom('noreply@yourdomain.com', 'Blood Donation System');
-                $mail->addAddress($donor['email']); // Donor's email address
+// Recipients
+$mail->setFrom('noreply@yourdomain.com', 'Blood Donation System');
+$mail->addAddress($donor['email']); // Donor's email address
 
-                // Content
-                $mail->isHTML(true);
-                $mail->Subject = 'Blood Request Notification';
-                $mail->Body    = '<p>Dear Donor,</p><p>You have received a new blood request. Please log in to your dashboard to view the details and respond.</p><p>Thank you for your generosity.</p>';
+// Content
+$mail->isHTML(true);
+$mail->Subject = 'Blood Request Notification';
+$mail->Body = '<p>Dear Donor,</p><p>You have received a new blood request. Please log in to your dashboard to view the details and respond.</p><p>Thank you for your generosity.</p>';
 
-                $mail->send();
-                $message .= " An email notification has been sent to the donor.";
-            } catch (Exception $e) {
-                $message .= " Failed to send email notification. Mailer Error: {$mail->ErrorInfo}";
-            }
-        } else {
-            $message = "Already Sent Request";
-        }
-    }
+$mail->send();
+$message .= " An email notification has been sent to the donor.";
+} catch (Exception $e) {
+$message .= " Failed to send email notification. Mailer Error: {$mail->ErrorInfo}";
+}
+} else {
+$message = $response['message'];
+}
+}
 }
 
 if (isset($_POST['search'])) {
-    $blood_type = $_POST['blood_type'];
-    $donors_result = $user->searchDonors($blood_type, $user_lat, $user_lng, 5); // Limit to 5 nearest donors
+$blood_type = $_POST['blood_type'];
+
+// Call Python API to search for donors
+$api_url = 'http://localhost:5000/search_donors';
+$data = array(
+'blood_type' => $blood_type,
+'user_lat' => $user_lat,
+'user_lng' => $user_lng,
+'k' => 5
+);
+$options = array(
+'http' => array(
+'header' => "Content-Type: application/json\r\n",
+'method' => 'POST',
+'content' => json_encode($data)
+)
+);
+$context = stream_context_create($options);
+$response = file_get_contents($api_url, false, $context);
+$donors_result = json_decode($response, true);
 } else {
-    $donors_result = [];
+$donors_result = [];
 }
 ?>
 <!DOCTYPE html>

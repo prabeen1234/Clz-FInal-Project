@@ -3,6 +3,9 @@ session_start();
 include 'includes/Config.php'; // Include your configuration file if any
 include 'includes/Login.php';
 
+$error = null; // Initialize the error variable
+$success = null; // Initialize the success variable
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = isset($_POST['email']) ? $_POST['email'] : null;
     $password = isset($_POST['password']) ? $_POST['password'] : null;
@@ -13,12 +16,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($login->userLogin($email, $password)) {
             $role = $_SESSION['role'];
-            if ($role == 'donor') {
-                header("Location: ../blood/donors/donor_dashboard.php");
-            } elseif ($role == 'user') {
-                header("Location: ../blood/users/user_dashboard.php");
-            }
-            exit();
+            $success = "Login successful! Redirecting...";
+            echo "<script>setTimeout(function(){ window.location.href = '../blood/{$role}s/{$role}_dashboard.php'; }, 2000);</script>";
         } else {
             $error = "Invalid email or password";
         }
@@ -30,6 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -110,6 +110,53 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             background-color: #ff4081; /* Button hover color */
             color: #fff;
         }
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+        }
+
+        .toast.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @-webkit-keyframes fadein {
+            from {bottom: 0; opacity: 0;} 
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @-webkit-keyframes fadeout {
+            from {bottom: 30px; opacity: 1;} 
+            to {bottom: 0; opacity: 0;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+        .toast.success {
+            background-color: #4CAF50; /* Green for success */
+        }
+        .toast.error {
+            background-color: #f44336; /* Red for error */
+        }
         .error {
             color: #d9534f;
             font-size: 16px; /* Error text size */
@@ -184,7 +231,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             passwordInput.addEventListener('input', validateForm);
 
             validateForm(); // Run initial check
+
+            <?php if ($error): ?>
+                showToast("<?php echo $error; ?>", "error");
+            <?php elseif ($success): ?>
+                showToast("<?php echo $success; ?>", "success");
+            <?php endif; ?>
         });
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = 'toast show ' + type;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.className = toast.className.replace('show', '');
+                setTimeout(() => document.body.removeChild(toast), 500);
+            }, 3000);
+        }
     </script>
     
 </head>
@@ -195,9 +259,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <i>←</i> Back
         </a>
         <h2>Login</h2>
-        <?php if (isset($error)): ?>
-            <div class="error"><?php echo htmlspecialchars($error); ?></div>
-        <?php endif; ?>
         <form method="post" action="">
             <div class="form-group">
                 <label for="email">Email:</label>
@@ -211,14 +272,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <input type="submit" value="Login">
             </div>
         </form>
+
         <div class="links">
-            <div class="register-link">
-                <p>Not Registered? <a href="pages/register.php"><b>Register Now</b></a></p>
-            </div>
-            <div class="forgot-password-link">
-                <p>Forgot Password? <a href="pages/forgot_password.php"><b>Click Here</b></a></p>
-            </div>
+            <a href="pages/register.php">Register</a>
+            <a href="pages/forgot_password.php">Forgot Password?</a>
         </div>
     </div>
+
 </body>
 </html>

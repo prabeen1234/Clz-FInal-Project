@@ -28,10 +28,10 @@ $footer = new Footer();
 	</div>
 	<div id="nav" class="col-12">
 		<ul>
-		  <li><a class="active" href="../index.php">Home</a></li>
-		  <li><a href="../blood/login.php">Login</a></li>
-		  <li><a href="../blood/admin/admin_login.php">Admin Login</a></li>
-		  <li><a href="../blood/pages/register.php">Register Now</a></li>
+		  <li><a class="active" href="index.php">Home</a></li>
+		  <li><a href="login.php">Login</a></li>
+		  <li><a href="admin/admin_login.php">Admin Login</a></li>
+		  <li><a href="pages/register.php">Register Now</a></li>
 		  <?php 
 		  	if(isset($_SESSION['sess_user_id'])&&!empty($_SESSION['sess_user_id'])){
 				echo '<li style="background-color: rgba(255,0,0,0.5);"><a href="logout.php">Logout</a></ul>';
