@@ -55,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             width: 90%;
             height: 90vh;
             max-width: 600px;
-            max-height: 600px;
+            max-height: 500px;
             color: #fff;
             text-align: center;
             position: relative;
