@@ -44,7 +44,27 @@ $requests_result = $requests_query->get_result();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Requests</title>
     <style>
-        body {
+        .request-table .view-btn {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    text-align: center;
+    display: inline-block;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.request-table .view-btn:hover {
+    background-color: #0056b3;
+}
+
+.request-table .view-btn:active {
+    background-color: #004085;
+}
+
+         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
@@ -134,6 +154,21 @@ $requests_result = $requests_query->get_result();
             background-color: #f9f9f9;
         }
 
+        .request-table .status-pending {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        .request-table .status-declined {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .request-table .status-accepted {
+            background-color: #28a745;
+            color: #fff;
+        }
+
         .request-table .delete-btn {
             background-color: #dc3545;
             color: #fff;
@@ -215,7 +250,9 @@ $requests_result = $requests_query->get_result();
                         <tr>
                             <td><?php echo htmlspecialchars($row['id']); ?></td>
                             <td><?php echo htmlspecialchars($row['donor_id']); ?></td>
-                            <td><?php echo htmlspecialchars($row['status']); ?></td>
+                            <td class="<?php echo 'status-' . strtolower(htmlspecialchars($row['status'])); ?>">
+                                <?php echo htmlspecialchars($row['status']); ?>
+                            </td>
                             <td><?php echo htmlspecialchars($row['created_at']); ?></td>
                             <td>
                                 <?php if ($row['status'] === 'Pending'): ?>
@@ -223,6 +260,8 @@ $requests_result = $requests_query->get_result();
                                         <input type="hidden" name="delete_request_id" value="<?php echo htmlspecialchars($row['id']); ?>">
                                         <button type="submit" class="delete-btn">Cancel</button>
                                     </form>
+                                <?php elseif ($row['status'] === 'Accepted'): ?>
+                                    <a href="view_donor.php?request_id=<?php echo htmlspecialchars($row['id']); ?>&user_id=<?php echo htmlspecialchars($row['donor_id']); ?>" class="view-btn">View Details</a>
                                 <?php endif; ?>
                             </td>
                         </tr>
