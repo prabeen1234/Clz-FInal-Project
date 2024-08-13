@@ -63,6 +63,9 @@ class Register {
             $longitude = (float)$data['longitude'];
             $role = $this->con->real_escape_string($data['role']);
 
+            // Set account status based on role
+            $status = ($role === 'donor') ? 'pending' : 'approved';
+
             // Check if phone number already exists
             if ($this->isPhoneRegistered($mobile)) {
                 echo '<script>
@@ -83,15 +86,15 @@ class Register {
 
             // Prepare SQL statement
             $query = "INSERT INTO users (password, fullname, age, sex, blood_type, mobile, email, weight, state, latitude, longitude, role, status)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')";
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             $stmt = $this->con->prepare($query);
-            $stmt->bind_param("ssisssssddss", $password, $fullname, $age, $sex, $blood_type, $mobile, $email, $weight, $state, $latitude, $longitude, $role);
+            $stmt->bind_param("ssissssssdsss", $password, $fullname, $age, $sex, $blood_type, $mobile, $email, $weight, $state, $latitude, $longitude, $role, $status);
 
             if ($stmt->execute()) {
                 // Registration successful
                 echo '<script>
-                        alert("Registration successful. Your account is pending review.");
+                        alert("Registration successful. Your account is ' . $status . '.");
                         window.location.href = "../index.php";
                       </script>';
             } else {

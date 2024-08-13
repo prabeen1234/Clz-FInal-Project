@@ -4,8 +4,8 @@ session_start();
 require '../includes/Config.php';
 require '../includes/Register.php';
 require '../vendor/autoload.php'; // Adjust path as needed
-
 require '../includes/EmailService.php';
+
 use PHPMailer\PHPMailer\Exception;
 
 // Enable error reporting
@@ -47,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
