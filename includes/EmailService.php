@@ -30,8 +30,8 @@ class EmailService
         try {
             // Email details
             $this->mail->addAddress($to);
-            $this->mail->Subject = 'Your OTP Code';
-            $this->mail->Body    = "Your OTP code is: $otp";
+            $this->mail->Subject = 'Your OTP is';
+            $this->mail->Body    = "$otp";
 
             // Send email
             $this->mail->send();

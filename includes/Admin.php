@@ -59,5 +59,13 @@ class Admin {
         }
         return $users;
     }
+    public function getUserEmail($userId) {
+        $stmt = $this->con->prepare("SELECT email FROM users WHERE id = ?");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        return $result['email'];
+    }
+    
 }
 ?>

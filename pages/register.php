@@ -3,26 +3,25 @@ use App\Services\EmailService;
 session_start();
 require '../includes/Config.php';
 require '../includes/Register.php';
-require '../vendor/autoload.php'; // Adjust path as needed
+require '../vendor/autoload.php';
 require '../includes/EmailService.php';
 
 use PHPMailer\PHPMailer\Exception;
 
-// Enable error reporting
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 $db = new Database();
-$con = $db->getConnection(); // Initialize the database connection
+$con = $db->getConnection(); 
 
-$register = new Register($con); // Pass the connection to Register class
+$register = new Register($con); 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $mobile = $_POST['mobile'];
     $email = $_POST['email'];
 
-    // Check if the mobile or email is already registered
+    
     if ($register->isPhoneRegistered($mobile) || $register->isEmailRegistered($email)) {
         echo '<script>
                 alert("Mobile or Email is already registered");
@@ -30,11 +29,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
               </script>';
     } else {
         try {
-            $otp = rand(100000, 999999); // Generate a 6-digit OTP
-            $_SESSION['otp'] = $otp; // Store OTP in session
-            $_SESSION['registration_data'] = $_POST; // Store registration data
-
-            // Send OTP to user's email
+            $otp = rand(100000, 999999); 
+            $_SESSION['otp'] = $otp; 
+            $_SESSION['registration_data'] = $_POST; 
             $emailService = new EmailService();
             $emailService->sendOtpEmail($email, $otp);
 

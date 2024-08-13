@@ -1,10 +1,17 @@
+
 <?php
+use App\Services\EmailService;
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
 session_start();
-require '../includes/Config.php'; // This should include Database.php and initialize $db
+require '../includes/Config.php'; // Ensure this includes Database.php and initializes $db
 require '../includes/Admin.php';
+require '../vendor/autoload.php';
+require '../includes/EmailService.php'; 
+
 if (!isset($_SESSION['admin'])) {
     header('Location: admin_login.php');
     exit();
@@ -17,29 +24,41 @@ $con = $db->getConnection();
 // Initialize the Admin class
 $admin = new Admin($con);
 
+// Initialize the EmailService class
+$emailService = new EmailService();
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['approve']) || isset($_POST['reject'])) {
         $userId = $_POST['user_id'];
         $status = isset($_POST['approve']) ? 'approved' : 'rejected';
-        
-        if ($status == 'rejected') {
-            // Delete the user if rejected
-            $admin->deleteUser($userId);
+        $userEmail = $admin->getUserEmail($userId); // Assuming you have a method to get the user email
+
+        try {
+            if ($status == 'rejected') {
+                // Delete the user if rejected
+                $admin->deleteUser($userId);
+                $emailService->sendOtpEmail($userEmail, 'Your Registration has been Rejected... Try Again'); // Adjust method as necessary
+                echo '<script>
+                alert("User rejected and email notification sent.");
+                window.location.href = "manage_request.php";
+                </script>';
+            } else {
+                // Update the user status if approved
+                $admin->updateUserStatus($userId, $status);
+                $emailService->sendOtpEmail($userEmail, 'Your Request has been Accepted.'); // Adjust method as necessary
+                echo '<script>
+                alert("User approved and email notification sent.");
+                window.location.href = "manage_request.php";
+                </script>';
+            }
+        } catch (Exception $e) {
             echo '<script>
-            alert("User deleted successfully");
+            alert("Error sending email: ' . htmlspecialchars($e->getMessage()) . '");
             window.location.href = "manage_request.php";
             </script>';
-            exit();
-        } else {
-            // Update the user status if approved
-            $admin->updateUserStatus($userId, $status);
-            echo '<script>
-            alert("User approved successfully");
-            window.location.href = "manage_request.php";
-            </script>';
-            exit();
         }
+        exit();
     }
 }
 
@@ -239,7 +258,7 @@ $db->close();
             <h2>Admin Menu</h2>
             <a href="admin_dashboard.php">Dashboard</a>
             <a href="manage_user.php">Manage Users</a>
-            <a href="manage_request.php" >Manage Requests</a>
+            <a href="manage_request.php">Manage Requests</a>
             <a href="../logout.php" class="logout-btn">Logout</a>
         </div>
         <div class="dashboard-content">
@@ -264,7 +283,6 @@ $db->close();
                         <label for="blood">Blood Group:</label>
                         <input type="text" id="blood_type" name="blood_type" value="<?php echo htmlspecialchars($user['blood_type']); ?>" required disabled>
                     </div>
-                
                     <div class="form-group">
                         <label for="phone">Phone:</label>
                         <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($user['mobile']); ?>" required disabled>
