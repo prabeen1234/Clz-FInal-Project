@@ -33,5 +33,18 @@ class UserManager {
         $result = $this->con->query($query);
         return $result;
     }
+    public function getUserById($id) {
+        $stmt = $this->con->prepare("SELECT * FROM users WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc();
+    }
+
+    public function updateUserStatus($id, $status) {
+        $stmt = $this->con->prepare("UPDATE users SET status = ? WHERE id = ?");
+        $stmt->bind_param("si", $status, $id);
+        return $stmt->execute();
+    }
 }
 ?>

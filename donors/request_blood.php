@@ -360,7 +360,7 @@ $accepted_requests = $accepted_requests_result->fetch_all(MYSQLI_ASSOC);
             echo '<li>';
             echo '<span>Request ID: ' . $request['id'] . '</span>';
             echo '<span>Created At: ' . $request['created_at'] . '</span>';
-            echo '<span><b>Please Visit Nearby Hospital or Blood Bank For Blood Donation <br>As Soon as Possible!!!!!!</b></span>';
+            echo '<span><b>Please Visit to the Users Nearby Hospital or Blood Bank and Contact For Blood Donation <br>As Soon as Possible!!!!!!</b></span>';
             echo '<form method="get" action="user_detail.php">';
             echo '<input type="hidden" name="request_id" value="' . $request['id'] . '">';
             echo '<input type="hidden" name="user_id" value="' . $request['user_id'] . '">';

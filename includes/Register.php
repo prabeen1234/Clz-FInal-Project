@@ -53,7 +53,7 @@ class Register {
             $password = password_hash($data['password'], PASSWORD_BCRYPT);
             $fullname = $this->con->real_escape_string($data['fullname']);
             $age = (int)$data['age'];
-            $gender = $this->con->real_escape_string($data['sex']);
+            $sex = $this->con->real_escape_string($data['sex']);
             $blood_type = $this->con->real_escape_string($data['blood_type']);
             $mobile = $this->con->real_escape_string($data['mobile']);
             $email = $this->con->real_escape_string($data['email']);
@@ -66,8 +66,8 @@ class Register {
             // Check if phone number already exists
             if ($this->isPhoneRegistered($mobile)) {
                 echo '<script>
-                        alert("Mobile already registered");
-                        window.location.href = "../login.php";
+                        alert("Mobile number already registered");
+                        window.location.href = "../register.php";
                       </script>';
                 return;
             }
@@ -76,32 +76,38 @@ class Register {
             if ($this->isEmailRegistered($email)) {
                 echo '<script>
                         alert("Email is already registered");
-                        window.location.href = "../login.php";
+                        window.location.href = "../register.php";
                       </script>';
                 return;
             }
 
             // Prepare SQL statement
-            $query = "INSERT INTO users (password, fullname, age, sex, blood_type, mobile, email, weight, state, latitude, longitude, role)
-                      VALUES ('$password', '$fullname', $age, '$gender', '$blood_type', '$mobile', '$email', '$weight', '$state', $latitude, $longitude, '$role')";
+            $query = "INSERT INTO users (password, fullname, age, sex, blood_type, mobile, email, weight, state, latitude, longitude, role, status)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')";
 
-            if ($this->con->query($query)) {
+            $stmt = $this->con->prepare($query);
+            $stmt->bind_param("ssisssssddss", $password, $fullname, $age, $sex, $blood_type, $mobile, $email, $weight, $state, $latitude, $longitude, $role);
+
+            if ($stmt->execute()) {
                 // Registration successful
                 echo '<script>
-                        alert("Registration successful");
+                        alert("Registration successful. Your account is pending review.");
                         window.location.href = "../index.php";
                       </script>';
             } else {
                 // Registration failed
                 echo '<script>
                         alert("Registration failed: ' . htmlspecialchars($this->con->error, ENT_QUOTES, 'UTF-8') . '");
+                        window.location.href = "../register.php";
                       </script>';
             }
+
+            $stmt->close();
         } else {
             // Missing or empty fields
             echo '<script>
-                    alert("Please fill and select all required fields");
-                    window.location.href = "../index.php";
+                    alert("Please fill in all required fields.");
+                    window.location.href = "../register.php";
                   </script>';
         }
     }

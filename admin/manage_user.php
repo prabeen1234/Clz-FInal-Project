@@ -203,7 +203,9 @@ if (!$users_result) {
         <div class="side-menu">
             <h2>Admin Menu</h2>
             <a href="admin_dashboard.php">Dashboard</a>
+           
             <a href="manage_user.php" class="active">Manage Users</a>
+             <a href="admin_review.php">Register  Request</a>
             <a href="manage_request.php" >Manage Request</a>
             <a href="../logout.php" class="logout-btn">Logout</a>
         </div>

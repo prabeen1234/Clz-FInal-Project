@@ -1,10 +1,11 @@
+
 <?php
 session_start();
-include 'includes/Config.php'; // Include your configuration file if any
+include 'includes/Config.php'; 
 include 'includes/Login.php';
 
-$error = null; // Initialize the error variable
-$success = null; // Initialize the success variable
+$error = null; 
+$success = null; 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = isset($_POST['email']) ? $_POST['email'] : null;
@@ -19,10 +20,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $success = "Login successful! Redirecting...";
             echo "<script>setTimeout(function(){ window.location.href = '../blood/{$role}s/{$role}_dashboard.php'; }, 2000);</script>";
         } else {
-            $error = "Invalid email or password";
+            $error = "Invalid email, password, or account not approved";
         }
 
-        // Close the database connection
         $db->close();
     } else {
         $error = "Email and password are required";
@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body {
+ body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
             height: 100vh;
@@ -211,8 +211,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 .back-button i {
     margin-right: 8px;
     font-size: 20px;
-}
-    </style>
+}    </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const emailInput = document.getElementById('email');
@@ -250,12 +249,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }, 3000);
         }
     </script>
-    
 </head>
 <body>
 
     <div class="login-container">
-    <a href="index.php" class="back-button">
+        <a href="index.php" class="back-button">
             <i>←</i> Back
         </a>
         <h2>Login</h2>

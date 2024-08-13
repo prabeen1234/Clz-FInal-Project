@@ -174,6 +174,7 @@ if (!$requests_result) {
             <h2>Admin Menu</h2>
             <a href="admin_dashboard.php">Dashboard</a>
             <a href="manage_user.php">Manage Users</a>
+            <a href="admin_review.php">Register  Request</a>
             <a href="manage_request.php" class="active">Manage Requests</a>
             <a href="../logout.php" class="logout-btn">Logout</a>
         </div>

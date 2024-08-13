@@ -34,6 +34,15 @@ def get_compatible_blood_types(blood_type):
     }
     return compatibility.get(blood_type, [])
 
+def calculate_knn_score(user_blood_type, donor_blood_type):
+    compatible_types = get_compatible_blood_types(user_blood_type)
+    if donor_blood_type in compatible_types:
+        return 1  
+    elif user_blood_type == donor_blood_type:
+        return 0.5  
+    else:
+        return 0 
+
 @app.route('/search_donors', methods=['POST'])
 def search_donors():
     data = request.get_json()
@@ -45,13 +54,10 @@ def search_donors():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    compatible_blood_types = get_compatible_blood_types(blood_type)
-    placeholders = ', '.join(['%s'] * len(compatible_blood_types))
-    query = f"""
+    query = """
         SELECT id, fullname, blood_type, age, weight, latitude, longitude
         FROM users
         WHERE role = 'donor'
-          AND blood_type IN ({placeholders})
           AND id NOT IN (
               SELECT donor_id
               FROM requests
@@ -59,13 +65,15 @@ def search_donors():
                 AND accepted_date > DATE_SUB(NOW(), INTERVAL 1 MONTH)
           )
     """
-    cursor.execute(query, compatible_blood_types)
+    cursor.execute(query)
     donors = cursor.fetchall()
 
     for donor in donors:
         donor['distance'] = haversine(user_lat, user_lng, donor['latitude'], donor['longitude'])
+        donor['knn_score'] = calculate_knn_score(blood_type, donor['blood_type'])
 
-    donors.sort(key=lambda x: x['distance'])
+    donors = sorted(donors, key=lambda x: (-x['knn_score'], x['distance']))
+
     top_donors = donors[:k]
 
     cursor.close()

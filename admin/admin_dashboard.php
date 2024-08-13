@@ -146,6 +146,7 @@ if (!$users_result) {
             <a href="admin_dashboard.php" class="active">Dashboard</a>
             <a href="manage_user.php">Manage Users</a>
             <a href="manage_request.php">Manage Request</a>
+            <a href="admin_review.php">Register  Request</a>
             <a href="../logout.php" class="logout-btn">Logout</a>
         </div>
 
