@@ -70,7 +70,7 @@ class Register {
             if ($this->isPhoneRegistered($mobile)) {
                 echo '<script>
                         alert("Mobile number already registered");
-                        window.location.href = "../register.php";
+                        window.location.href = "../pages/register.php";
                       </script>';
                 return;
             }
@@ -79,7 +79,7 @@ class Register {
             if ($this->isEmailRegistered($email)) {
                 echo '<script>
                         alert("Email is already registered");
-                        window.location.href = "../register.php";
+                        window.location.href = "../pages/register.php";
                       </script>';
                 return;
             }
@@ -101,7 +101,7 @@ class Register {
                 // Registration failed
                 echo '<script>
                         alert("Registration failed: ' . htmlspecialchars($this->con->error, ENT_QUOTES, 'UTF-8') . '");
-                        window.location.href = "../register.php";
+                        window.location.href = "../pages/register.php";
                       </script>';
             }
 
@@ -110,7 +110,7 @@ class Register {
             // Missing or empty fields
             echo '<script>
                     alert("Please fill in all required fields.");
-                    window.location.href = "../register.php";
+                    window.location.href = "../pages/register.php";
                   </script>';
         }
     }
