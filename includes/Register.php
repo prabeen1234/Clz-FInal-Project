@@ -39,17 +39,17 @@ class Register {
     }
 
     public function handleRegistration($data) {
+        // Validate input
         if (
             isset($data['password'], $data['fullname'], $data['age'], $data['sex'],
                   $data['blood_type'], $data['mobile'], $data['email'], $data['weight'],
-                  $data['state'], $data['latitude'], $data['longitude'], $data['role'], $_FILES['image']) &&
+                  $data['state'], $data['latitude'], $data['longitude'], $data['role']) &&
             !empty($data['password']) && !empty($data['fullname']) &&
             !empty($data['age']) && !empty($data['sex']) && !empty($data['blood_type']) &&
             !empty($data['mobile']) && !empty($data['email']) && !empty($data['weight']) &&
-            !empty($data['state']) && !empty($data['latitude']) && !empty($data['longitude']) &&
-            !empty($data['role']) && !empty($_FILES['image']['name'])
+            !empty($data['state']) && !empty($data['latitude']) && !empty($data['longitude']) && !empty($data['role'])
         ) {
-            // Sanitize and hash the password
+            // Sanitize input data
             $password = password_hash($data['password'], PASSWORD_BCRYPT);
             $fullname = $this->con->real_escape_string($data['fullname']);
             $age = (int)$data['age'];
@@ -62,66 +62,57 @@ class Register {
             $latitude = (float)$data['latitude'];
             $longitude = (float)$data['longitude'];
             $role = $this->con->real_escape_string($data['role']);
-    
-            // Handle image upload
-            $imageName = time() . '_' . basename($_FILES['image']['name']);
-            $imagePath = '../uploads/' . $imageName;
-    
-            if (move_uploaded_file($_FILES['image']['tmp_name'], $imagePath)) {
-                // Set account status based on role
-                $status = ($role === 'donor') ? 'pending' : 'approved';
-    
-                // Check if phone number already exists
-                if ($this->isPhoneRegistered($mobile)) {
-                    echo '<script>
-                            alert("Mobile number already registered");
-                            window.location.href = "../pages/register.php";
-                          </script>';
-                    return;
-                }
-    
-                // Check if email already exists
-                if ($this->isEmailRegistered($email)) {
-                    echo '<script>
-                            alert("Email is already registered");
-                            window.location.href = "../pages/register.php";
-                          </script>';
-                    return;
-                }
-    
-                // Prepare SQL statement
-                $query = "INSERT INTO users (password, fullname, age, sex, blood_type, mobile, email, weight, state, latitude, longitude, role, status, image)
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
-                $stmt = $this->con->prepare($query);
-                $stmt->bind_param("ssissssssdssss", $password, $fullname, $age, $sex, $blood_type, $mobile, $email, $weight, $state, $latitude, $longitude, $role, $status, $imageName);
-    
-                if ($stmt->execute()) {
-                    echo '<script>
-                            alert("Registration successful. Your account is ' . $status . '.");
-                            window.location.href = "../index.php";
-                          </script>';
-                } else {
-                    echo '<script>
-                            alert("Registration failed: ' . htmlspecialchars($this->con->error, ENT_QUOTES, 'UTF-8') . '");
-                            window.location.href = "../pages/register.php";
-                          </script>';
-                }
-    
-                $stmt->close();
-            } else {
+
+            // Set account status based on role
+            $status = ($role === 'donor') ? 'pending' : 'approved';
+
+            // Check if phone number already exists
+            if ($this->isPhoneRegistered($mobile)) {
                 echo '<script>
-                        alert("Failed to upload image.");
-                        window.location.href = "../pages/register.php";
+                        alert("Mobile number already registered");
+                        window.location.href = "../register.php";
+                      </script>';
+                return;
+            }
+
+            // Check if email already exists
+            if ($this->isEmailRegistered($email)) {
+                echo '<script>
+                        alert("Email is already registered");
+                        window.location.href = "../register.php";
+                      </script>';
+                return;
+            }
+
+            // Prepare SQL statement
+            $query = "INSERT INTO users (password, fullname, age, sex, blood_type, mobile, email, weight, state, latitude, longitude, role, status)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            $stmt = $this->con->prepare($query);
+            $stmt->bind_param("ssissssssdsss", $password, $fullname, $age, $sex, $blood_type, $mobile, $email, $weight, $state, $latitude, $longitude, $role, $status);
+
+            if ($stmt->execute()) {
+                // Registration successful
+                echo '<script>
+                        alert("Registration successful. Your account is ' . $status . '.");
+                        window.location.href = "../index.php";
+                      </script>';
+            } else {
+                // Registration failed
+                echo '<script>
+                        alert("Registration failed: ' . htmlspecialchars($this->con->error, ENT_QUOTES, 'UTF-8') . '");
+                        window.location.href = "../register.php";
                       </script>';
             }
+
+            $stmt->close();
         } else {
+            // Missing or empty fields
             echo '<script>
                     alert("Please fill in all required fields.");
-                    window.location.href = "../pages/register.php";
+                    window.location.href = "../register.php";
                   </script>';
         }
     }
-    
 }
 ?>

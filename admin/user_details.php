@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             } else {
                 // Update the user status if approved
                 $admin->updateUserStatus($userId, $status);
-                $emailService->sendOtpEmail($userEmail, 'Your Request has been Accepted.'); // Adjust method as necessary
+                $emailService->sendOtpEmail($userEmail, 'Your Registration Request has been Accepted.'); // Adjust method as necessary
                 echo '<script>
                 alert("User approved and email notification sent.");
                 window.location.href = "manage_request.php";
