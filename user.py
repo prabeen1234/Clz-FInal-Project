@@ -34,14 +34,18 @@ def get_compatible_blood_types(blood_type):
     }
     return compatibility.get(blood_type, [])
 
-def calculate_knn_score(user_blood_type, donor_blood_type):
+def calculate_knn_score(user_blood_type, donor_blood_type, distance):
     compatible_types = get_compatible_blood_types(user_blood_type)
     if donor_blood_type in compatible_types:
-        return 1  
+        score = 1
     elif user_blood_type == donor_blood_type:
-        return 0.5  
+        score = 0.5
     else:
-        return 0 
+        score = 0
+    
+    # Adjust score based on distance: closer donors get higher scores
+    distance_factor = 1 / (1 + distance)  # Inverse distance weighting
+    return score * distance_factor
 
 @app.route('/search_donors', methods=['POST'])
 def search_donors():
@@ -49,7 +53,7 @@ def search_donors():
     blood_type = data.get('blood_type')
     user_lat = data.get('user_lat')
     user_lng = data.get('user_lng')
-    k = data.get('k', 5)
+    k = data.get('k', 5)  # Number of nearest donors to return
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -68,12 +72,15 @@ def search_donors():
     cursor.execute(query)
     donors = cursor.fetchall()
 
+    # Calculate distances and KNN scores
     for donor in donors:
         donor['distance'] = haversine(user_lat, user_lng, donor['latitude'], donor['longitude'])
-        donor['knn_score'] = calculate_knn_score(blood_type, donor['blood_type'])
+        donor['knn_score'] = calculate_knn_score(blood_type, donor['blood_type'], donor['distance'])
 
+    # Sort donors first by KNN score (descending) and then by distance (ascending)
     donors = sorted(donors, key=lambda x: (-x['knn_score'], x['distance']))
 
+    # Return top k donors
     top_donors = donors[:k]
 
     cursor.close()
