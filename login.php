@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($login->userLogin($email, $password)) {
             $role = $_SESSION['role'];
             $success = "Login successful! Redirecting...";
-            echo "<script>setTimeout(function(){ window.location.href = '../blood/{$role}s/{$role}_dashboard.php'; }, 2000);</script>";
+            echo "<script>window.location.href = '../blood/{$role}s/{$role}_dashboard.php?login=success';</script>";
         } else {
             $error = "Invalid email, password, or account not approved";
         }
@@ -111,52 +111,58 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             color: #fff;
         }
         .toast {
-            visibility: hidden;
-            min-width: 250px;
-            margin-left: -125px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 2px;
-            padding: 16px;
-            position: fixed;
-            z-index: 1;
-            left: 50%;
-            bottom: 30px;
-            font-size: 17px;
-        }
+    visibility: hidden;
+    min-width: 250px;
+    margin-left: -125px;
+    background-color: #ffffff; /* Light background for better visibility */
+    color: #333; /* Dark text color for contrast */
+    text-align: center;
+    border-radius: 2px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1;
+    left: 50%;
+    bottom: 30px;
+    font-size: 17px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Slight shadow for better visibility */
+}
 
-        .toast.show {
-            visibility: visible;
-            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-            animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        }
+.toast.show {
+    visibility: visible;
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2s;
+    animation: fadein 0.5s, fadeout 0.5s 2s;
+}
 
-        @-webkit-keyframes fadein {
-            from {bottom: 0; opacity: 0;} 
-            to {bottom: 30px; opacity: 1;}
-        }
+@-webkit-keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
 
-        @keyframes fadein {
-            from {bottom: 0; opacity: 0;}
-            to {bottom: 30px; opacity: 1;}
-        }
+@keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
 
-        @-webkit-keyframes fadeout {
-            from {bottom: 30px; opacity: 1;} 
-            to {bottom: 0; opacity: 0;}
-        }
+@-webkit-keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+}
 
-        @keyframes fadeout {
-            from {bottom: 30px; opacity: 1;}
-            to {bottom: 0; opacity: 0;}
-        }
-        .toast.success {
-            background-color: #4CAF50; /* Green for success */
-        }
-        .toast.error {
-            background-color: #f44336; /* Red for error */
-        }
+@keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+}
+
+.toast.success {
+    background-color: #d4edda; /* Light green for success */
+    color: #155724; /* Dark green text for success */
+}
+
+.toast.error {
+    background-color: #f8d7da; /* Light red for error */
+    color: #721c24; /* Dark red text for error */
+}
+
         .error {
             color: #d9534f;
             font-size: 16px; /* Error text size */

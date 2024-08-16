@@ -296,7 +296,7 @@ $db->close();
                         <input type="text" id="longitude" name="longitude" value="<?php echo htmlspecialchars($user['longitude']); ?>" required disabled>
                     </div>
                     <div class="form-group">
-                        <label for="image">Profile Image:</label>
+                        <label for="image">Id Image:</label>
                         <?php if ($userImageBlob): ?>
                             <a href="data:image/jpeg;base64,<?php echo base64_encode($userImageBlob); ?>" data-lightbox="user-image" data-title="User Image">
                                 <img src="data:image/jpeg;base64,<?php echo base64_encode($userImageBlob); ?>" alt="User Image">
