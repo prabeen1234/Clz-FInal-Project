@@ -1,11 +1,5 @@
-
 <?php
 use App\Services\EmailService;
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 session_start();
 require '../includes/Config.php'; // Ensure this includes Database.php and initializes $db
 require '../includes/Admin.php';
@@ -17,56 +11,48 @@ if (!isset($_SESSION['admin'])) {
     exit();
 }
 
-// Initialize the Database class
 $db = new Database();
 $con = $db->getConnection();
 
-// Initialize the Admin class
 $admin = new Admin($con);
-
-// Initialize the EmailService class
 $emailService = new EmailService();
 
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['approve']) || isset($_POST['reject'])) {
         $userId = $_POST['user_id'];
         $status = isset($_POST['approve']) ? 'approved' : 'rejected';
-        $userEmail = $admin->getUserEmail($userId); // Assuming you have a method to get the user email
+        $userEmail = $admin->getUserEmail($userId);
 
         try {
             if ($status == 'rejected') {
-                // Delete the user if rejected
                 $admin->deleteUser($userId);
-                $emailService->sendOtpEmail($userEmail, 'Your Registration has been Rejected... Try Again'); // Adjust method as necessary
+                $emailService->sendOtpEmail($userEmail, 'Your Registration has been Rejected... Try Again');
                 echo '<script>
                 alert("User rejected and email notification sent.");
-                window.location.href = "manage_request.php";
+                window.location.href = "admin_review.php";
                 </script>';
             } else {
-                // Update the user status if approved
                 $admin->updateUserStatus($userId, $status);
-                $emailService->sendOtpEmail($userEmail, 'Your Registration Request has been Accepted.'); // Adjust method as necessary
+                $emailService->sendOtpEmail($userEmail, 'Your Registration Request has been Accepted.');
                 echo '<script>
                 alert("User approved and email notification sent.");
-                window.location.href = "manage_request.php";
+                window.location.href = "admin_review.php";
                 </script>';
             }
         } catch (Exception $e) {
             echo '<script>
             alert("Error sending email: ' . htmlspecialchars($e->getMessage()) . '");
-            window.location.href = "manage_request.php";
+            window.location.href = "admin_review.php";
             </script>';
         }
         exit();
     }
 }
 
-// Get user ID from query parameter
 $userId = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $user = $admin->getUserDetails($userId);
+$userImageBlob = $admin->getUserImage($userId);
 
-// Ensure default values for potentially unset fields
 $user = array_merge([
     'fullname' => '',
     'email' => '',
@@ -80,7 +66,6 @@ $user = array_merge([
     'longitude' => ''
 ], $user);
 
-// Close the database connection
 $db->close();
 ?>
 <!DOCTYPE html>
@@ -89,10 +74,13 @@ $db->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="../css/style.css">
+    <!-- Lightbox2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
     <style>
+        /* General Body and Dashboard Styling */
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #e9ecef;
+            background-color: #f5f5f5;
             margin: 0;
             padding: 0;
             display: flex;
@@ -150,19 +138,14 @@ $db->close();
             align-items: center;
         }
 
-        .dashboard-content h2 {
-            font-size: 30px;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
+        /* Form Container Styling */
         .form-container {
-            max-width: 650px;
+            max-width: 800px;
             width: 100%;
             padding: 25px;
-            background-color: #f8f9fa;
+            background-color: #ffffff;
             border-radius: 10px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .message {
@@ -171,6 +154,7 @@ $db->close();
             margin-bottom: 20px;
             color: #fff;
             font-weight: bold;
+            text-align: center;
         }
 
         .message.success {
@@ -181,6 +165,7 @@ $db->close();
             background-color: #dc3545;
         }
 
+        /* Form Group Styling */
         .form-group {
             margin-bottom: 20px;
         }
@@ -199,6 +184,7 @@ $db->close();
             border-radius: 5px;
             font-size: 16px;
             box-sizing: border-box;
+            background-color: #f8f9fa;
         }
 
         .form-group input[type="submit"] {
@@ -208,45 +194,47 @@ $db->close();
             cursor: pointer;
             font-size: 16px;
             padding: 15px;
+            border-radius: 5px;
         }
 
         .form-group input[type="submit"]:hover {
             background-color: #0056b3;
         }
 
-        #map {
-            height: 400px;
-            width: 100%;
-            margin-top: 20px;
+        /* Image Styling */
+        .form-group img {
+            max-width: 100%;
+            height: auto;
             border: 1px solid #ced4da;
             border-radius: 5px;
+            margin-top: 10px;
         }
 
-        .button-container {
-            margin-top: 20px;
+        /* Form Actions Styling */
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
         }
 
-        .button-container button {
+        .form-actions input[type="submit"] {
             background-color: #007bff;
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
-            margin-right: 5px;
-            transition: background-color 0.3s ease;
+            padding: 10px 20px;
+            border-radius: 5px;
         }
 
-        .button-container button:hover {
+        .form-actions input[type="submit"]:hover {
             background-color: #0056b3;
         }
 
-        .button-container button.reject {
+        .form-actions input[name="reject"] {
             background-color: #dc3545;
         }
 
-        .button-container button.reject:hover {
+        .form-actions input[name="reject"]:hover {
             background-color: #c82333;
         }
     </style>
@@ -293,11 +281,11 @@ $db->close();
                     </div>
                     <div class="form-group">
                         <label for="age">Age:</label>
-                        <input type="number" id="age" name="age" value="<?php echo htmlspecialchars($user['age']); ?>" required disabled>
+                        <input type="text" id="age" name="age" value="<?php echo htmlspecialchars($user['age']); ?>" required disabled>
                     </div>
                     <div class="form-group">
                         <label for="weight">Weight:</label>
-                        <input type="number" id="weight" name="weight" value="<?php echo htmlspecialchars($user['weight']); ?>" required disabled>
+                        <input type="text" id="weight" name="weight" value="<?php echo htmlspecialchars($user['weight']); ?>" required disabled>
                     </div>
                     <div class="form-group">
                         <label for="latitude">Latitude:</label>
@@ -307,29 +295,25 @@ $db->close();
                         <label for="longitude">Longitude:</label>
                         <input type="text" id="longitude" name="longitude" value="<?php echo htmlspecialchars($user['longitude']); ?>" required disabled>
                     </div>
-                    <div id="map"></div>
-                    <div class="button-container">
-                        <button type="submit" name="approve">Approve</button>
-                        <button type="submit" name="reject" class="reject">Reject</button>
+                    <div class="form-group">
+                        <label for="image">Profile Image:</label>
+                        <?php if ($userImageBlob): ?>
+                            <a href="data:image/jpeg;base64,<?php echo base64_encode($userImageBlob); ?>" data-lightbox="user-image" data-title="User Image">
+                                <img src="data:image/jpeg;base64,<?php echo base64_encode($userImageBlob); ?>" alt="User Image">
+                            </a>
+                        <?php else: ?>
+                            <p>No image available</p>
+                        <?php endif; ?>
+                    </div>
+                    <div class="form-actions">
+                        <input type="submit" name="approve" value="Approve">
+                        <input type="submit" name="reject" value="Reject">
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCPYMI9P4d29sp8AGl_4z9py1ZEt8YXmcI&callback=initMap" async defer></script>
-    <script>
-        function initMap() {
-            const map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 8,
-                center: {lat: <?php echo htmlspecialchars($user['latitude']); ?>, lng: <?php echo htmlspecialchars($user['longitude']); ?>}
-            });
-
-            const marker = new google.maps.Marker({
-                map: map,
-                draggable: true,
-                position: {lat: <?php echo htmlspecialchars($user['latitude']); ?>, lng: <?php echo htmlspecialchars($user['longitude']); ?>}
-            });
-        }
-    </script>
+    <!-- Lightbox2 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 </body>
 </html>

@@ -1,5 +1,4 @@
 <?php
-
 class Admin {
     private $con;
 
@@ -7,7 +6,14 @@ class Admin {
         $this->con = $dbConnection;
     }
 
-    // Update user status
+    public function getUserImage($userId) {
+        $stmt = $this->con->prepare("SELECT imageBlob FROM users WHERE id = ?");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        return $result['imageBlob'] ?? null; // Return null if no image_blob is found
+    }
+
     public function updateUserStatus($userId, $status) {
         $query = "UPDATE users SET status = ? WHERE id = ?";
         $stmt = $this->con->prepare($query);
@@ -19,7 +25,6 @@ class Admin {
         $stmt->close();
     }
 
-    // Get user details by ID
     public function getUserDetails($userId) {
         $query = "SELECT id, fullname, email, mobile, state, age, weight, blood_type, sex, latitude, longitude FROM users WHERE id = ?";
         $stmt = $this->con->prepare($query);
@@ -34,7 +39,6 @@ class Admin {
         return $user;
     }
 
-    // Delete user by ID
     public function deleteUser($userId) {
         $query = "DELETE FROM users WHERE id = ?";
         $stmt = $this->con->prepare($query);
@@ -46,7 +50,6 @@ class Admin {
         $stmt->close();
     }
 
-    // Get pending users
     public function getPendingUsers() {
         $query = "SELECT id, fullname, email, mobile FROM users WHERE status = 'pending'";
         $result = $this->con->query($query);
@@ -59,6 +62,7 @@ class Admin {
         }
         return $users;
     }
+
     public function getUserEmail($userId) {
         $stmt = $this->con->prepare("SELECT email FROM users WHERE id = ?");
         $stmt->bind_param("i", $userId);
@@ -66,6 +70,5 @@ class Admin {
         $result = $stmt->get_result()->fetch_assoc();
         return $result['email'];
     }
-    
 }
 ?>

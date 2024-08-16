@@ -84,12 +84,18 @@ class Register {
                 return;
             }
 
+            // Handle image upload
+            $imageBlob = null;
+            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                $imageBlob = file_get_contents($_FILES['image']['tmp_name']);
+            }
+
             // Prepare SQL statement
-            $query = "INSERT INTO users (password, fullname, age, sex, blood_type, mobile, email, weight, state, latitude, longitude, role, status)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $query = "INSERT INTO users (password, fullname, age, sex, blood_type, mobile, email, weight, state, latitude, longitude, role, status, imageBlob)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             $stmt = $this->con->prepare($query);
-            $stmt->bind_param("ssissssssdsss", $password, $fullname, $age, $sex, $blood_type, $mobile, $email, $weight, $state, $latitude, $longitude, $role, $status);
+            $stmt->bind_param("ssissssssdssss", $password, $fullname, $age, $sex, $blood_type, $mobile, $email, $weight, $state, $latitude, $longitude, $role, $status, $imageBlob);
 
             if ($stmt->execute()) {
                 // Registration successful
@@ -114,5 +120,21 @@ class Register {
                   </script>';
         }
     }
+}
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $data = $_POST;
+
+    // Make sure to handle file uploads correctly
+    if (isset($_FILES['image'])) {
+        $data['imageBlob'] = file_get_contents($_FILES['image']['tmp_name']);
+    }
+
+    $db = new Database();
+    $con = $db->getConnection();
+
+    $register = new Register($con);
+    $register->handleRegistration($data);
 }
 ?>

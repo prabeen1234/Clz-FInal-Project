@@ -1,4 +1,8 @@
 <?php
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 use App\Services\EmailService;
 session_start();
 require '../includes/Config.php';
@@ -240,7 +244,7 @@ select::placeholder {
             <i>←</i> Back
         </a>
         <h2>Registration Form</h2>
-        <form id="registration-form" action="register.php" method="post">
+        <form id="registration-form" action="register.php" method="post" enctype="multipart/form-data">
             <label for="fullname">Fullname:</label>
             <input type="text" id="fullname" name="fullname" required oninput="validateForm()">
 
@@ -253,6 +257,9 @@ select::placeholder {
             <label for="age">Age:</label>
             <input type="number" id="age" name="age" required min="1" max="120" oninput="validateForm()">
 
+            <label for="image">Upload Image:</label>
+            <input type="file" id="image" name="image" accept="image/*" required>
+            
             <label for="sex">Sex:</label>
             <select id="sex" name="sex" required oninput="validateForm()">
                 <option value="male">Male</option>
