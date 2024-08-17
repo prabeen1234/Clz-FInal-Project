@@ -6,7 +6,6 @@ class Register {
         $this->con = $con;
     }
 
-    // Private methods for checking registration
     private function checkPhone($phone) {
         $query = "SELECT id FROM users WHERE mobile = ?";
         $stmt = $this->con->prepare($query);
@@ -29,7 +28,6 @@ class Register {
         return $exists;
     }
 
-    // Public methods to check if phone or email is registered
     public function isPhoneRegistered($phone) {
         return $this->checkPhone($phone);
     }
@@ -38,8 +36,7 @@ class Register {
         return $this->checkEmail($email);
     }
 
-    public function handleRegistration($data) {
-        // Validate input
+    public function handleRegistration($data, $imageBlob) {
         if (
             isset($data['password'], $data['fullname'], $data['age'], $data['sex'],
                   $data['blood_type'], $data['mobile'], $data['email'], $data['weight'],
@@ -49,7 +46,6 @@ class Register {
             !empty($data['mobile']) && !empty($data['email']) && !empty($data['weight']) &&
             !empty($data['state']) && !empty($data['latitude']) && !empty($data['longitude']) && !empty($data['role'])
         ) {
-            // Sanitize input data
             $password = password_hash($data['password'], PASSWORD_BCRYPT);
             $fullname = $this->con->real_escape_string($data['fullname']);
             $age = (int)$data['age'];
@@ -63,10 +59,8 @@ class Register {
             $longitude = (float)$data['longitude'];
             $role = $this->con->real_escape_string($data['role']);
 
-            // Set account status based on role
             $status = ($role === 'donor') ? 'pending' : 'approved';
 
-            // Check if phone number already exists
             if ($this->isPhoneRegistered($mobile)) {
                 echo '<script>
                         alert("Mobile number already registered");
@@ -75,7 +69,6 @@ class Register {
                 return;
             }
 
-            // Check if email already exists
             if ($this->isEmailRegistered($email)) {
                 echo '<script>
                         alert("Email is already registered");
@@ -84,13 +77,6 @@ class Register {
                 return;
             }
 
-            // Handle image upload
-            $imageBlob = null;
-            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-                $imageBlob = file_get_contents($_FILES['image']['tmp_name']);
-            }
-
-            // Prepare SQL statement
             $query = "INSERT INTO users (password, fullname, age, sex, blood_type, mobile, email, weight, state, latitude, longitude, role, status, imageBlob)
                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -98,13 +84,11 @@ class Register {
             $stmt->bind_param("ssissssssdssss", $password, $fullname, $age, $sex, $blood_type, $mobile, $email, $weight, $state, $latitude, $longitude, $role, $status, $imageBlob);
 
             if ($stmt->execute()) {
-                // Registration successful
                 echo '<script>
                         alert("Registration successful. Your account is ' . $status . '.");
                         window.location.href = "../index.php";
                       </script>';
             } else {
-                // Registration failed
                 echo '<script>
                         alert("Registration failed: ' . htmlspecialchars($this->con->error, ENT_QUOTES, 'UTF-8') . '");
                         window.location.href = "../pages/register.php";
@@ -113,28 +97,11 @@ class Register {
 
             $stmt->close();
         } else {
-            // Missing or empty fields
             echo '<script>
                     alert("Please fill in all required fields.");
                     window.location.href = "../pages/register.php";
                   </script>';
         }
     }
-}
-
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $data = $_POST;
-
-    // Make sure to handle file uploads correctly
-    if (isset($_FILES['image'])) {
-        $data['imageBlob'] = file_get_contents($_FILES['image']['tmp_name']);
-    }
-
-    $db = new Database();
-    $con = $db->getConnection();
-
-    $register = new Register($con);
-    $register->handleRegistration($data);
 }
 ?>
