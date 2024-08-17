@@ -5,6 +5,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'donor') {
     exit();
 }
 
+require '../vendor/autoload.php'; // Include PHPMailer
+
 include '../includes/Config.php';
 $db = new Database();
 $con = $db->getConnection();
@@ -38,16 +40,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($action === 'Accept') {
         $update_query = $con->prepare("UPDATE requests SET status = 'Accepted', donor_id = ?, accepted_date = NOW() WHERE id = ?");
         $update_query->bind_param("ii", $user_id, $request_id);
+        $subject = "Blood Request Accepted";
+        $message = "Hello " . htmlspecialchars($user['fullname']) . ",\n\nYour blood request has been accepted by the donor. Please coordinate further details.\n\nThank you.";
     } else if ($action === 'Reject') {
         $update_query = $con->prepare("UPDATE requests SET status = 'Declined', donor_id = ? WHERE id = ?");
         $update_query->bind_param("ii", $user_id, $request_id);
+        $subject = "Blood Request Declined";
+        $message = "Hello " . htmlspecialchars($user['fullname']) . ",\n\nUnfortunately, your blood request has been declined by the donor.\n\nPlease try requesting from another donor.\n\nThank you.";
     }
 
     if ($update_query->execute()) {
-        echo '<script>
-        alert("Request updated successfully");
-        window.location.href = "request_blood.php";
-        </script>';
+        // Send notification email using PHPMailer
+        $mail = new PHPMailer\PHPMailer\PHPMailer();
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';  // Set the SMTP server to send through
+        $mail->SMTPAuth = true;
+        $mail->Username = 'pubgidws@gmail.com';  // SMTP username
+        $mail->Password = 'lcdeiryfjiseeouw';   // SMTP password
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
+
+        $mail->setFrom('no-reply@yourdomain.com', 'Blood Donation System');
+        $mail->addAddress($user['email']);  // Add the recipient's email
+        $mail->Subject = $subject;
+        $mail->Body = $message;
+
+        if ($mail->send()) {
+            echo '<script>
+            alert("Request updated successfully and notification sent.");
+            window.location.href = "request_blood.php";
+            </script>';
+        } else {
+            echo "Request updated successfully, but failed to send notification.";
+        }
     } else {
         echo "Failed to update request.";
     }

@@ -257,7 +257,7 @@ select::placeholder {
             <label for="age">Age:</label>
             <input type="number" id="age" name="age" required min="1" max="120" oninput="validateForm()">
 
-            <label for="image">Upload Image:(ID if You Are a Donor)</label>
+            <label for="image">Upload Image(Id If You Are a Donor):</label>
             <input type="file" id="image" name="image" accept="image/*" required>
             
             <label for="sex">Sex:</label>
