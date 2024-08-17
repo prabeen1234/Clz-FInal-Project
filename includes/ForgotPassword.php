@@ -40,7 +40,7 @@ class ForgotPassword {
             $otp = mt_rand(100000, 999999); // Generate a 6-digit OTP
             $expiry = date("Y-m-d H:i:s", strtotime("+15 minutes")); // OTP valid for 15 minutes
 
-            $stmt = $this->conn->prepare("UPDATE users SET otp = ?, otp_expiry = ?, status = 'pending' WHERE email = ?");
+            $stmt = $this->conn->prepare("UPDATE users SET otp = ?, otp_expiry = ?, status = 'approved' WHERE email = ?");
             if (!$stmt) {
                 return "Prepare failed: (" . $this->conn->errno . ") " . $this->conn->error;
             }
