@@ -266,10 +266,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <input type="text" id="state" name="state" required>
 
             <label for="latitude">Latitude:</label>
-            <input type="text" id="latitude" name="latitude" required>
+            <input type="text" id="latitude" name="latitude" readonly required>
 
             <label for="longitude">Longitude:</label>
-            <input type="text" id="longitude" name="longitude" required>
+            <input type="text" id="longitude" name="longitude" readonly required>
 
             <div id="map"></div>
 

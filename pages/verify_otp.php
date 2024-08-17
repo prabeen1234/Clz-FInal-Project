@@ -32,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -41,8 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Verify OTP</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6b73ff 0%, #000dff 100%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -51,17 +50,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         .otp-verification {
             background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             width: 100%;
             max-width: 400px;
             text-align: center;
+            transition: transform 0.3s;
+        }
+        .otp-verification:hover {
+            transform: translateY(-5px);
         }
         .otp-verification h2 {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             color: #333;
-            font-size: 24px;
+            font-size: 28px;
+            font-weight: 700;
         }
         .otp-verification form {
             display: flex;
@@ -69,35 +73,44 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         .otp-verification label {
             margin-bottom: 10px;
-            font-size: 16px;
+            font-size: 18px;
             color: #555;
+            font-weight: 600;
         }
         .otp-verification input[type="text"] {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
             margin-bottom: 20px;
             font-size: 16px;
-            width: calc(100% - 24px);
+            width: 100%;
             box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        .otp-verification input[type="text"]:focus {
+            outline: none;
+            border-color: #6b73ff;
         }
         .otp-verification button {
-            padding: 10px;
+            padding: 15px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             background-color: #28a745;
             color: #fff;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.3s;
         }
         .otp-verification button:hover {
             background-color: #218838;
+            transform: scale(1.05);
         }
         @media (max-width: 480px) {
             .otp-verification {
-                padding: 20px;
+                padding: 30px;
                 box-shadow: none;
+                border-radius: 10px;
             }
         }
     </style>
