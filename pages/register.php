@@ -221,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
 
             <label for="age">Age:</label>
-            <input type="number" id="age" name="age" required min="1" max="120">
+            <input type="number" id="age" name="age" required min="20" max="120">
 
             <label for="image">Upload Image (ID if you are a Donor):</label>
             <input type="file" id="image" name="image" accept="image/*" required>
@@ -260,7 +260,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <input type="email" id="email" name="email" required>
 
             <label for="weight">Weight:</label>
-            <input type="number" id="weight" name="weight" required min="1" max="500">
+            <input type="number" id="weight" name="weight" required min="45" max="500">
 
             <label for="state">State:</label>
             <input type="text" id="state" name="state" required>

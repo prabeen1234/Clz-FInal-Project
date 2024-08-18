@@ -8,16 +8,16 @@ def get_db_connection():
     conn = mysql.connector.connect(
         host='localhost',
         user='root',
-        password='prabin@123',
+        password='prabin@123', 
         database='blood'
     )
     return conn
 
 def haversine(lat1, lon1, lat2, lon2):
-    earth_radius = 6371  # km
+    earth_radius = 6371 
     dLat = math.radians(lat2 - lat1)
     dLon = math.radians(lon2 - lon1)
-    a = math.sin(dLat / 2) * math.sin(dLat / 2) + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dLon / 2) * math.sin(dLon / 2)
+    a = math.sin(dLat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dLon / 2) ** 2
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     return earth_radius * c
 
@@ -72,16 +72,21 @@ def search_donors():
     cursor.execute(query)
     donors = cursor.fetchall()
 
-    # Calculate distances and KNN scores
+    # Calculate distances and filter only compatible donors within 10 km
+    compatible_donors = []
     for donor in donors:
-        donor['distance'] = haversine(user_lat, user_lng, donor['latitude'], donor['longitude'])
-        donor['knn_score'] = calculate_knn_score(blood_type, donor['blood_type'], donor['distance'])
+        if donor['blood_type'] in get_compatible_blood_types(blood_type):  # Only consider compatible donors
+            distance = haversine(user_lat, user_lng, donor['latitude'], donor['longitude'])
+            if distance <= 10:  # Only include donors within 10 km radius
+                donor['distance'] = distance
+                donor['knn_score'] = calculate_knn_score(blood_type, donor['blood_type'], distance)
+                compatible_donors.append(donor)
 
-    # Sort donors first by KNN score (descending) and then by distance (ascending)
-    donors = sorted(donors, key=lambda x: (-x['knn_score'], x['distance']))
+    # Sort compatible donors first by KNN score (descending) and then by distance (ascending)
+    compatible_donors = sorted(compatible_donors, key=lambda x: (-x['knn_score'], x['distance']))
 
-    # Return top k donors
-    top_donors = donors[:k]
+    # Return top k compatible donors
+    top_donors = compatible_donors[:k]
 
     cursor.close()
     conn.close()

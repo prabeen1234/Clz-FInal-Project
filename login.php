@@ -36,8 +36,63 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
+.login-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px;
+    border: 1px solid #007bff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border-radius: 20px;
+    background-color: #ffffff; /* Default background color */
+    transition: background 0.3s ease, box-shadow 0.3s ease; /* Added transition for smooth effect */
+}
+
+.login-container:hover {
+    background: linear-gradient(135deg, #87ceeb, #00bfff); /* Light blue gradient on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Increased shadow on hover */
+}
+
+
+
+.back-button {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.back-button i {
+    margin-right: 5px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group i {
+    margin-right: 8px;
+}
+
+.links {
+    margin-top: 20px;
+}
+
+.links a {
+    display: block;
+    margin: 20px 20px;
+    text-decoration: none;
+    color: red;
+}
+
+.links a i {
+    margin-right: 5px;
+}
+
  body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
@@ -47,23 +102,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             justify-content: center;
             background: #f5f5f5;
         }
-        .login-container {
-            background: lightblue;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            height: 90vh;
-            max-width: 600px;
-            max-height: 500px;
-            color: #fff;
-            text-align: center;
-            position: relative;
-            transition: background-color 0.3s ease;
-        }
-        .login-container:hover {
-            background: linear-gradient(135deg, #2196f3, #ff4081);
-        }
+        
+        
         h2 {
             font-size: 55px; /* Large heading size */
             margin-bottom: 10px;
@@ -177,19 +217,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             color: black;
         }
         .links a {
-            color: #ffeb3b; /* Link color */
-            text-decoration: none;
-            padding: 8px;
-            color: red;
-            border-radius: 8px;
-            font-weight: bold;
-            background-color: rgba(255, 255, 255, 0.2);
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        .links a:hover {
-            background-color: #ff4081; /* Link hover background */
-            color: #fff; /* Link hover text color */
-        }
+    color: #ffeb3b; /* Link color */
+    text-decoration: none;
+    padding: 8px;
+    border-radius: 8px;
+    font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.links a:hover {
+    background-color: #87ceeb; /* Sky blue background color on hover */
+    color: #fff; /* White text color on hover */
+}
+
+
         .form-group input.invalid {
             border-color: #ff4081;
         }
@@ -258,30 +300,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
 
-    <div class="login-container">
-        <a href="index.php" class="back-button">
-            <i>←</i> Back
-        </a>
-        <h2>Login</h2>
-        <form method="post" action="">
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Login">
-            </div>
-        </form>
-
-        <div class="links">
-            <a href="pages/register.php">Register</a>
-            <a href="pages/forgot_password.php">Forgot Password?</a>
+<div class="login-container">
+    <a href="index.php" class="back-button">
+        <i class="fas fa-arrow-circle-left"></i> Back
+    </a>
+    <h2><i class="fas fa-user"></i> Login</h2>
+    <form method="post" action="">
+        <div class="form-group">
+            <label for="email"><i class="fas fa-envelope"></i> Email:</label>
+            <input type="email" id="email" name="email" required>
         </div>
+        <div class="form-group">
+            <label for="password"><i class="fas fa-lock"></i> Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Login">
+        </div>
+    </form>
+
+    <div class="links">
+        <a href="pages/register.php"><i class="fas fa-user-plus"></i> Register</a>
+        <a href="pages/forgot_password.php"><i class="fas fa-unlock"></i> Forgot Password?</a>
     </div>
+</div>
+
 
 </body>
 </html>
