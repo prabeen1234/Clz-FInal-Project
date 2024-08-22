@@ -43,8 +43,7 @@ def calculate_knn_score(user_blood_type, donor_blood_type, distance):
     else:
         score = 0
     
-    # Adjust score based on distance: closer donors get higher scores
-    distance_factor = 1 / (1 + distance)  # Inverse distance weighting
+    distance_factor = 1 / (1 + distance)  
     return score * distance_factor
 
 @app.route('/search_donors', methods=['POST'])
@@ -53,8 +52,7 @@ def search_donors():
     blood_type = data.get('blood_type')
     user_lat = data.get('user_lat')
     user_lng = data.get('user_lng')
-    k = data.get('k', 5)  # Number of nearest donors to return
-
+    k = data.get('k', 5) 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
@@ -62,6 +60,7 @@ def search_donors():
         SELECT id, fullname, blood_type, age, weight, latitude, longitude
         FROM users
         WHERE role = 'donor'
+          AND status != 'Pending' 
           AND id NOT IN (
               SELECT donor_id
               FROM requests
@@ -72,20 +71,17 @@ def search_donors():
     cursor.execute(query)
     donors = cursor.fetchall()
 
-    # Calculate distances and filter only compatible donors within 10 km
     compatible_donors = []
     for donor in donors:
-        if donor['blood_type'] in get_compatible_blood_types(blood_type):  # Only consider compatible donors
+        if donor['blood_type'] in get_compatible_blood_types(blood_type):  
             distance = haversine(user_lat, user_lng, donor['latitude'], donor['longitude'])
-            if distance <= 10:  # Only include donors within 10 km radius
+            if distance <= 10: 
                 donor['distance'] = distance
                 donor['knn_score'] = calculate_knn_score(blood_type, donor['blood_type'], distance)
                 compatible_donors.append(donor)
 
-    # Sort compatible donors first by KNN score (descending) and then by distance (ascending)
     compatible_donors = sorted(compatible_donors, key=lambda x: (-x['knn_score'], x['distance']))
 
-    # Return top k compatible donors
     top_donors = compatible_donors[:k]
 
     cursor.close()

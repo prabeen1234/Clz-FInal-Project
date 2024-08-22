@@ -7,18 +7,15 @@ session_start();
 require '../includes/Config.php';
 require '../includes/UserManager.php';
 
-// Check if user is logged in and has admin role
 if (!isset($_SESSION['admin'])) {
     header('Location: admin_login.php');
     exit();
 }
 
-// Initialize database and user manager
 $db = new Database();
 $con = $db->getConnection();
 $userManager = new UserManager($con);
 
-// Handle user deletion
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
     $userId = $_POST['id'];
     if ($userManager->deleteUser($userId)) {
@@ -28,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
     }
 }
 
-// Handle user search by mobile number
 $mobile = isset($_GET['mobile']) ? $_GET['mobile'] : '';
 
 if (!empty($mobile)) {

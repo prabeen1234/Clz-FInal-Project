@@ -222,13 +222,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     padding: 8px;
     border-radius: 8px;
     font-weight: bold;
+    color: red;
     background-color: rgba(255, 255, 255, 0.2);
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .links a:hover {
     background-color: #87ceeb; /* Sky blue background color on hover */
-    color: #fff; /* White text color on hover */
+    color: blueviolet; /* White text color on hover */
 }
 
 
