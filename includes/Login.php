@@ -17,9 +17,8 @@ class Login {
             $user = $result->fetch_assoc();
             // Check user status
             if ($user['status'] !== 'approved') {
-                return false; // User is either pending or rejected
+                return false; 
             }
-            // Assuming passwords are hashed
             if (password_verify($password, $user['password'])) {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['role'] = $user['role'];

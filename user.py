@@ -75,7 +75,7 @@ def search_donors():
     for donor in donors:
         if donor['blood_type'] in get_compatible_blood_types(blood_type):  
             distance = haversine(user_lat, user_lng, donor['latitude'], donor['longitude'])
-            if distance <= 10: 
+            if distance <= 10000: 
                 donor['distance'] = distance
                 donor['knn_score'] = calculate_knn_score(blood_type, donor['blood_type'], distance)
                 compatible_donors.append(donor)

@@ -7,12 +7,10 @@ class AdminLogin {
     }
 
     public function authenticate($username, $password) {
-        // Check if the credentials are "admin" and "admin"
         if ($username === 'admin' && $password === 'admin') {
-            return true; // For testing purposes only; remove for production
+            return true; 
         }
 
-        // Prepare a statement to avoid SQL injection
         $stmt = $this->db->prepare("SELECT * FROM admins WHERE username = ?");
         if (!$stmt) {
             error_log("Failed to prepare SQL statement.");
@@ -26,7 +24,6 @@ class AdminLogin {
         if ($result && $result->num_rows === 1) {
             $admin = $result->fetch_assoc();
 
-            // Check if the provided password matches the hashed password in the database
             if (password_verify($password, $admin['password'])) {
                 $stmt->close();
                 return true;

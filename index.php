@@ -6,7 +6,6 @@ require "includes/Footer.php";
 $footer = new Footer();
 ?>
 
-<
 <!DOCTYPE html>
 <html>
 <head>

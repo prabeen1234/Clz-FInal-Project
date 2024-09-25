@@ -56,11 +56,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mail->Host = 'smtp.gmail.com';  // Set the SMTP server to send through
         $mail->SMTPAuth = true;
         $mail->Username = 'pubgidws@gmail.com';  // SMTP username
-        $mail->Password = 'lcdeiryfjiseeouw';   // SMTP password
+        $mail->Password = 'wkkuzcnpiljyjmwa';   // SMTP password
         $mail->SMTPSecure = 'tls';
         $mail->Port = 587;
 
-        $mail->setFrom('no-reply@yourdomain.com', 'Blood Donation System');
+        $mail->setFrom('prabin@gmail.com', 'Blood Donation System');
         $mail->addAddress($user['email']);  // Add the recipient's email
         $mail->Subject = $subject;
         $mail->Body = $message;
@@ -71,7 +71,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             window.location.href = "request_blood.php";
             </script>';
         } else {
-            echo "Request updated successfully, but failed to send notification.";
+            echo '<script>
+            alert("Request updated successfully, but failed to send notification.");
+            window.location.href = "request_blood.php";
+            </script>';
         }
     } else {
         echo "Failed to update request.";

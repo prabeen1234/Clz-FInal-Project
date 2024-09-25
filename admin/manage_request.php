@@ -7,13 +7,12 @@ session_start();
 require '../includes/Config.php';
 require '../includes/RequestManager.php';
 
-// Check if user is logged in and has admin role
+
 if (!isset($_SESSION['admin'])) {
     header('Location: admin_login.php');
     exit();
 }
 
-// Initialize database and request manager
 $db = new Database();
 $con = $db->getConnection();
 $requestManager = new RequestManager($con);

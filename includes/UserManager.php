@@ -46,5 +46,25 @@ class UserManager {
         $stmt->bind_param("si", $status, $id);
         return $stmt->execute();
     }
+    public function editUser($id, $fullname, $email, $mobile, $role, $blood_type, $status) {
+        $stmt = $this->con->prepare("UPDATE users SET fullname=?, email=?, mobile=?, role=?, blood_type=?, status=? WHERE id=?");
+        $stmt->bind_param('ssssssi', $fullname, $email, $mobile, $role, $blood_type, $status, $id);
+        return $stmt->execute();
+    }
+
+    // Filter users by role
+    public function filterUsersByRole($role) {
+        $stmt = $this->con->prepare("SELECT * FROM users WHERE role=?");
+        $stmt->bind_param('s', $role);
+        $stmt->execute();
+        return $stmt->get_result();
+    }
+
+    // Bulk delete users
+    public function bulkDeleteUsers($userIds) {
+        $ids = implode(',', $userIds);
+        $stmt = $this->con->query("DELETE FROM users WHERE id IN ($ids)");
+        return $stmt;
+    }
 }
 ?>
